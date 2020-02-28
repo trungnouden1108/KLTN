@@ -9,12 +9,12 @@
 <body>
     <table>
         <tr>
-
-            <td>
+            <div align="center">
                     <h1>Video Streaming</h1>
-                    <img src="{% url 'videostream' stream_path='video' %}">
+                    <img  src="{% url 'videostream' stream_path='video' %}">
+                    <button onclick="location.href='{% url 'videostream' %}'">Capture</button>
 
-            </td>
+            </div>
         </tr>
     </table>
 

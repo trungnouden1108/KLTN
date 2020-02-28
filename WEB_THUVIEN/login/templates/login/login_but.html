@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+ <div align="center">
+     <form action="{% url 'cam_recog' %}" method ="post">
+         {% csrf_token %}
+         {% if id_check %}
+            <p><label>ID Độc Giả: </label><input type="text" name="id_check" value="{{ id_check }}"> </p>
+             <input type ="submit" value ="Tiếp tục">
+         {% endif %}
+     </form>
+ </div>
+</body>
+</html>

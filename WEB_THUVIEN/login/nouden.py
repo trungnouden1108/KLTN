@@ -16,3 +16,16 @@ def getsensordata():
         c = b.replace(" ", "")
         if c != "":
             return c
+
+def getdata():
+    #st = list(str(arduino.readline(), 'utf-8'))
+    #return (str(''.join(st[:])))
+    i=0
+    c=""
+    while i!=12:
+        a = arduino.read()
+        b = a.decode()
+        c=c+b
+        i=i+1
+    d=c.replace(" ","")
+    return d

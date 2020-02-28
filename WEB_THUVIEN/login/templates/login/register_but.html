@@ -5,7 +5,9 @@
     <title>Title</title>
 </head>
 <body>
-     <form action="." method="post">
+    <div align="center">
+
+     <form action="." method="post" >
         {% csrf_token %}
          <button onclick="location.href='{% url 'register' %}'">Quẹt lại</button><label>Vui lòng quẹt thẻ vào đầu đọc</label>
         {% if id_card %}
@@ -17,51 +19,15 @@
         <p><label>Số điện thoại: </label>{{ f.phone }}</p>
          <table border="1"><tr><th>Chụp ảnh
              <div>
-             <video id="video" playsinline autoplay ></video><canvas id="canvas" width="200" height="150"></canvas>
-             <button type ="button" id="snap">Capture</button>
+                 <img  src="{% url 'video' %}" alt="">
              </div>
          <script>
-             'use strict';
-             const video =document.getElementById('video');
-             const canvas =document.getElementById('canvas');
-             const snap=document.getElementById('snap');
-             const errorMsgElement = document.getElementById('span#ErrorMsg');
 
-             const constraints ={
-                audio: false,
-                video:{
-                    width:200,height:150
-                 }
-             };
-             async function init(){
-                try{
-                    const stream =await navigator.mediaDevices.getUserMedia(constraints);
-                    handleSuccess(stream);
-                }
-                catch(e){
-                    errorMsgElement.innerHTML =`navigator.getUserMedia.error:${e.toString()}`
-                }
-             }
-         function handleSuccess(stream){
-            window.stream =stream;
-            video.srcObject=stream;
-         }
-         init();
-         var context=canvas.getContext('2d');
-         snap.addEventListener("click",function(){
-            context.drawImage(video,0,0,200,150);
-            var anchor =document.createElement("a");
-            anchor.href=draw.toDataURL("image/png");
-            //var name=id_DG;
-            anchor.download="name.png";
-            anchor.innerHTML ="Click to download";
-            canvas.innerHTML="";
-            canvas.appendChild(anchor);
-          })
          </script>
          </th></tr></table>
         <input type ="submit" value ="Đăng kí">
         {% endif %}
     </form>
+    </div>
 </body>
 </html>
