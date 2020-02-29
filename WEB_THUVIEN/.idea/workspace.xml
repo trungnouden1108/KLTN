@@ -10,12 +10,16 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Python Script" />
         <option value="HTML File" />
+        <option value="Python Script" />
       </list>
     </option>
   </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
   <component name="ProjectId" id="1XvxbibTyYrE4cV9ge2s2oXsm7J" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showExcludedFiles" value="true" />
@@ -24,8 +28,8 @@
   <component name="PropertiesComponent">
     <property name="DefaultHtmlFileTemplate" value="HTML File" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
-    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
+    <property name="last_opened_file_path" value="I:/WEB_THUVIEN" />
+    <property name="settings.editor.selected.configurable" value="configurable.group.project" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
@@ -57,18 +61,18 @@
       <screen x="0" y="0" width="1366" height="728" />
     </state>
     <state x="452" y="199" key="#com.intellij.fileTypes.FileTypeChooser/0.0.1366.728@0.0.1366.728" timestamp="1582821692954" />
-    <state x="521" y="131" key="FileChooserDialogImpl" timestamp="1582820848280">
+    <state x="521" y="131" key="FileChooserDialogImpl" timestamp="1582955672692">
       <screen x="0" y="0" width="1366" height="728" />
     </state>
-    <state x="521" y="131" key="FileChooserDialogImpl/0.0.1366.728@0.0.1366.728" timestamp="1582820848280" />
-    <state x="244" y="18" key="SettingsEditor" timestamp="1581946592226">
+    <state x="521" y="131" key="FileChooserDialogImpl/0.0.1366.728@0.0.1366.728" timestamp="1582955672692" />
+    <state x="244" y="18" key="SettingsEditor" timestamp="1582982294704">
       <screen x="0" y="0" width="1366" height="728" />
     </state>
-    <state x="244" y="18" key="SettingsEditor/0.0.1366.728@0.0.1366.728" timestamp="1581946592226" />
-    <state x="391" y="193" key="com.intellij.ide.util.TipDialog" timestamp="1582873661732">
+    <state x="244" y="18" key="SettingsEditor/0.0.1366.728@0.0.1366.728" timestamp="1582982294704" />
+    <state x="391" y="193" key="com.intellij.ide.util.TipDialog" timestamp="1582982037786">
       <screen x="0" y="0" width="1366" height="728" />
     </state>
-    <state x="391" y="193" key="com.intellij.ide.util.TipDialog/0.0.1366.728@0.0.1366.728" timestamp="1582873661732" />
+    <state x="391" y="193" key="com.intellij.ide.util.TipDialog/0.0.1366.728@0.0.1366.728" timestamp="1582982037786" />
     <state x="404" y="49" key="search.everywhere.popup" timestamp="1581947810670">
       <screen x="0" y="0" width="1366" height="728" />
     </state>

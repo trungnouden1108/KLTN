@@ -75,8 +75,7 @@ def get_frame():
             stroke = 2
             end_cord_x = x + w
             end_cord_y = y + h
-            data=cv2.rectangle(img, (x, y), (end_cord_x, end_cord_y), color, stroke)
-        imgencode = cv2.imencode('.jpg',data )[1]
+        imgencode = cv2.imencode('.jpg',img )[1]
         stringData = imgencode.tostring()
         yield (b'--frame\r\n'b'Content-Type: text/plain\r\n\r\n' + stringData + b'\r\n')
         end = datetime.datetime.now()
@@ -85,21 +84,22 @@ def get_frame():
         hour_end=end.hour
         b=hour_end*3600+minute_end*60+second_end
 
-        if b-c == 10:
-            if currentframe != 10:
+        if (b-c) == 5:
+            if currentframe !=5:
                 if len(faces) == 1:
-                    face = faces[0]
-                    # lưu lại những điểm của khuôn mặt
+                    face=faces[0]
                     x, y, w, h = face
-                    im_face = img[y:y + h, x:x + w]
+                    image=img[y:y+h,x:x+w]
+                    # lưu lại những điểm của khuôn mặt
                     name = './Image/' + a + '/' + str(currentframe) + '.jpg'
                     print('Creating...' + name)
-                    cv2.imwrite(name, im_face)
+                    cv2.imwrite(name, image)
                     currentframe += 1
             else:
                 break
 
     face_training.train()
+    face_training.eye_train()
     del (camera)
 
 
@@ -146,41 +146,58 @@ class but_login(View):
 #nhận dạng khuôn mặt
 def camera_recognize():
     camera = cv2.VideoCapture(0)
-    face_cascade = cv2.CascadeClassifier('I:\Program Files\Python\Lib\site-packages\cv2\data\haarcascade_frontalface_alt2.xml')
+    face_cascade = cv2.CascadeClassifier('I:\Program Files\Python\Lib\site-packages\cv2\data\haarcascade_frontalface_alt.xml')
+    eyes_cascade = cv2.CascadeClassifier('I:\Program Files\Python\Lib\site-packages\cv2\data\haarcascade_eye.xml')
+
     recognizer = cv2.face.LBPHFaceRecognizer_create()
     recognizer.read("trainer.yml")
 
+    eyes_recognizer = cv2.face.LBPHFaceRecognizer_create()
+    eyes_recognizer.read("eyes-trainner.yml")
+
     labels = {"person_name": 1}
     with open("labels.pickle", "rb") as f:
-        labels = pickle.load(f)
-        labels = {v: k for k, v in labels.items()}
+        og_labels = pickle.load(f)
+        labels = {v: k for k, v in og_labels.items()}
 
+    eyes_labels = {"eyes_person_name": 1}
+    with open("eyeslabels.pickle", 'rb') as f:
+        og_labels = pickle.load(f)
+        eyes_labels = {v: k for k, v in og_labels.items()}
     while True:
         name=""
         ret, frame = camera.read()
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        faces = face_cascade.detectMultiScale(gray, scaleFactor=1.5, minNeighbors=5)
+        faces = face_cascade.detectMultiScale(frame, scaleFactor=1.5, minNeighbors=5)
+        eyes = eyes_cascade.detectMultiScale(frame)
+
         for (x, y, w, h) in faces:
-            roi_gray = gray[y:y + h, x:x + w]  # (cord1-height,cord2-height)
-            id_, conf = recognizer.predict(roi_gray)
-            if conf >= 45 and conf <= 85:
-                print("id",id_)
-                print("conf",conf)
-                font = cv2.FONT_HERSHEY_SIMPLEX
-                name = (labels[id_])
-                print("name",name)
-                color = (255, 243, 153)
+            for(ex,ey,ew,eh) in eyes:
+                roi_gray = gray[y:y + h, x:x + w]  # (cord1-height,cord2-height)
+                capture_eyes = gray[ey:ey + eh, ex:ex + ew]
+                id_, conf = recognizer.predict(roi_gray)
+                temp, eyes_conf = eyes_recognizer.predict(capture_eyes)
+                if conf:
+                    if eyes_conf:
+                        print("id",id_)
+                        print("eyes",eyes_conf)
+                        print("conf",conf)
+                        font = cv2.FONT_HERSHEY_SIMPLEX
+                        name = (labels[id_])
+                        print("name",name)
+                        color = (255, 243, 153)
+                        stroke = 2
+                        cv2.putText(frame, name, (x, y), font, 1, color, stroke, cv2.LINE_AA)
+                color = (255, 0, 0)
                 stroke = 2
-                cv2.putText(frame, name, (x, y), font, 1, color, stroke, cv2.LINE_AA)
-            color = (255, 0, 0)
-            stroke = 2
-            end_cord_x = x + w
-            end_cord_y = y + h
-            font = cv2.FONT_HERSHEY_SIMPLEX
-            img2=cv2.rectangle(frame, (x, y), (end_cord_x, end_cord_y), color, stroke)+cv2.putText(frame, name, (x, y), font, 1, color, stroke, cv2.LINE_AA)
-            imgencode = cv2.imencode('.jpg', img2)[1]
-            stringData = imgencode.tostring()
-            yield (b'--frame\r\n'b'Content-Type: text/plain\r\n\r\n' + stringData + b'\r\n')
+                end_cord_x = x + w
+                end_cord_y = y + h
+                font = cv2.FONT_HERSHEY_SIMPLEX
+                cv2.rectangle(frame, (x, y), (end_cord_x, end_cord_y), color, stroke)
+                cv2.rectangle(frame,(ex,ey),(ex+ew,ey+eh),color,stroke)
+                imgencode = cv2.imencode('.jpg', frame)[1]
+                stringData = imgencode.tostring()
+                yield (b'--frame\r\n'b'Content-Type: text/plain\r\n\r\n' + stringData + b'\r\n')
 
     del (camera)
 
