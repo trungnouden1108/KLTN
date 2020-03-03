@@ -6,7 +6,7 @@
 </head>
 <body>
  <div align="center">
-     <form action="{% url 'cam_recog' %}" method ="post">
+     <form action="." method ="post">
          {% csrf_token %}
          {% if id_check %}
             <p><label>ID Độc Giả: </label><input type="text" name="id_check" value="{{ id_check }}"> </p>

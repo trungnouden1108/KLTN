@@ -4,7 +4,6 @@ from .forms import Register
 from . import nouden as no
 from . import capture_img
 from django.views import View
-import cv2
 from django.http import StreamingHttpResponse,HttpResponseServerError
 from .models import DocGia
 import serial
@@ -40,7 +39,7 @@ class but_register(View):
 
 
 def get_frame():
-    camera = cv2.VideoCapture(0)
+    camera = cv2.VideoCapture(1)
     face_cascade = cv2.CascadeClassifier('I:\Program Files\Python\Lib\site-packages\cv2\data\haarcascade_frontalface_alt2.xml')
 
     a=no.getdata()
@@ -117,7 +116,10 @@ def dynamic_stream(request,stream_path="video"):
     except :
         return "error"
 """
-
+global name
+name =""
+global id_check
+id_check=""
 #stream_video
 def video_feed(request):
     try:
@@ -138,14 +140,24 @@ class but_login(View):
         id_check=request.POST.get('id_check')
         try:
             DocGia.objects.get(id_DG=id_check)
+            print(id_check)
+            try:
+                c=camera_recognize(id_check)
+                print("flag",c)
+                if (c==1):
+                    return render(request,'login/success.html')
+                else:
+                    return HttpResponse("khuôn mặt ko khớp")
+            except:
+                return "error"
         except ObjectDoesNotExist:
             return HttpResponse("chua đăng ki")
-        return render(request,'login/login_camera.html')
+        #return render(request,'login/login_camera.html')
 
 
 #nhận dạng khuôn mặt
-def camera_recognize():
-    camera = cv2.VideoCapture(0)
+def camera_recognize(check):
+    camera = cv2.VideoCapture(1)
     face_cascade = cv2.CascadeClassifier('I:\Program Files\Python\Lib\site-packages\cv2\data\haarcascade_frontalface_alt.xml')
     eyes_cascade = cv2.CascadeClassifier('I:\Program Files\Python\Lib\site-packages\cv2\data\haarcascade_eye.xml')
 
@@ -164,31 +176,53 @@ def camera_recognize():
     with open("eyeslabels.pickle", 'rb') as f:
         og_labels = pickle.load(f)
         eyes_labels = {v: k for k, v in og_labels.items()}
+
+    flag = 0;
+    start = datetime.datetime.now()
+    second_start = start.second
+    minute_start = start.minute
+    hour_start = start.hour
+    c = hour_start * 3600 + minute_start * 60 + second_start
     while True:
-        name=""
+        end = datetime.datetime.now()
+        second_end = end.second
+        minute_end = end.minute
+        hour_end = end.hour
+        b = hour_end * 3600 + minute_end * 60 + second_end
         ret, frame = camera.read()
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         faces = face_cascade.detectMultiScale(frame, scaleFactor=1.5, minNeighbors=5)
         eyes = eyes_cascade.detectMultiScale(frame)
+        if(flag ==0):
+            if (b - c) != 10:
+                print(b - c)
+                for (x, y, w, h) in faces:
+                    for(ex,ey,ew,eh) in eyes:
+                        roi_gray = gray[y:y + h, x:x + w]  # (cord1-height,cord2-height)
+                        capture_eyes = gray[ey:ey + eh, ex:ex + ew]
+                        id_, conf = recognizer.predict(roi_gray)
+                        temp, eyes_conf = eyes_recognizer.predict(capture_eyes)
 
-        for (x, y, w, h) in faces:
-            for(ex,ey,ew,eh) in eyes:
-                roi_gray = gray[y:y + h, x:x + w]  # (cord1-height,cord2-height)
-                capture_eyes = gray[ey:ey + eh, ex:ex + ew]
-                id_, conf = recognizer.predict(roi_gray)
-                temp, eyes_conf = eyes_recognizer.predict(capture_eyes)
-                if conf:
-                    if eyes_conf:
-                        print("id",id_)
-                        print("eyes",eyes_conf)
-                        print("conf",conf)
-                        font = cv2.FONT_HERSHEY_SIMPLEX
-                        name = (labels[id_])
-                        print("name",name)
-                        color = (255, 243, 153)
-                        stroke = 2
-                        cv2.putText(frame, name, (x, y), font, 1, color, stroke, cv2.LINE_AA)
-                color = (255, 0, 0)
+                        if conf and eyes_conf:
+                            print("id",id_)
+                            #print("eyes",eyes_conf)
+                            print("conf",conf)
+                            font = cv2.FONT_HERSHEY_SIMPLEX
+                            name = (labels[id_])
+                        #print("name", name)
+                            print(type(check))
+                            print(type(name))
+                            if name==check:
+                                flag=1
+                                print(1)
+                                break;
+            else:
+                flag=2
+                break;
+                        #color = (255, 243, 153)
+                        #stroke = 2
+                        #cv2.putText(frame, name, (x, y), font, 1, color, stroke, cv2.LINE_AA)
+                """color = (255, 0, 0)
                 stroke = 2
                 end_cord_x = x + w
                 end_cord_y = y + h
@@ -197,8 +231,10 @@ def camera_recognize():
                 cv2.rectangle(frame,(ex,ey),(ex+ew,ey+eh),color,stroke)
                 imgencode = cv2.imencode('.jpg', frame)[1]
                 stringData = imgencode.tostring()
-                yield (b'--frame\r\n'b'Content-Type: text/plain\r\n\r\n' + stringData + b'\r\n')
-
+                yield (b'--frame\r\n'b'Content-Type: text/plain\r\n\r\n' + stringData + b'\r\n')"""
+        else:
+            break;
+    return flag
     del (camera)
 
 
@@ -208,3 +244,5 @@ def video_cam_recog(request):
         return StreamingHttpResponse(camera_recognize(), content_type='multipart/x-mixed-replace; boundary=frame')
     except:
         return "error"
+
+
