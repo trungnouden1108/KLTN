@@ -14,8 +14,10 @@ def getsensordata():
     # b=str(a,encode='utf-8')
         b = a.decode()
         c = b.replace(" ", "")
-        if c != "":
-            return c
+        e = c.replace("\r", "")
+        f = e.replace("\n", "")
+        if f != "":
+            return f
 
 def getdata():
     #st = list(str(arduino.readline(), 'utf-8'))
@@ -28,4 +30,6 @@ def getdata():
         c=c+b
         i=i+1
     d=c.replace(" ","")
-    return d
+    e=d.replace("\r","")
+    f=e.replace("\n","")
+    return f

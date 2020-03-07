@@ -2,9 +2,8 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from .forms import Register
 from . import nouden as no
-from . import capture_img
 from django.views import View
-from django.http import StreamingHttpResponse,HttpResponseServerError
+from django.http import StreamingHttpResponse,HttpResponseServerError,HttpResponseRedirect
 from .models import DocGia
 import serial
 import numpy as np
@@ -16,40 +15,52 @@ from django.views.decorators import gzip
 import os
 from django.core.exceptions import ObjectDoesNotExist
 from . import face_training
+from django.contrib import messages
 # Create your views here.
+
+global name
+name =""
+global id_check
+id_check=""
+
+
+class begin(View):
+    def get(self,request):
+        return render(request,'login/begin.html')
 
 
 class register(View):
-    def get(self,request):
-        q=Register()
-        return render(request,'login/register.html',{'f':q,})
-
-class but_register(View):
     def get(self, request):
-        q = Register()
-        return render(request, 'login/register_but.html', {'f': q, 'id_card': no.getsensordata()})
+        while True:
+            q = Register()
+            return render(request, 'login/register.html', {'f': q, 'id_card': no.getsensordata()})
 
     def post(self,request):
         q=Register(request.POST)
         if q.is_valid():
             q.save()
-            return HttpResponse("OK")
+            messages.success(request,"Tài khoản được tạo thành công")
+            return render(request,'login/begin.html')
         else:
-            return HttpResponse("ko hợp lệ")
+            messages.error(request,"ID đã tồn tại")
+            return render(request,'login/begin.html')
 
 
 def get_frame():
-    camera = cv2.VideoCapture(1)
+    camera = cv2.VideoCapture(0)
     face_cascade = cv2.CascadeClassifier('I:\Program Files\Python\Lib\site-packages\cv2\data\haarcascade_frontalface_alt2.xml')
 
-    a=no.getdata()
+    a=no.getsensordata()
     b=a
     try:
-        # creating a folder named data
-        if not os.path.exists('Image/' + b):
+        #creating a folder named data
+        if os.path.exists('Image/' + b):
+            os.remove('Image/' + b)
             os.makedirs('Image/' + b)
-
-    # if not created then raise error
+            print("trung")
+        else:
+            os.makedirs('Image/' + b)
+    #if not created then raise error
     except OSError:
         print('Error: Creating directory of Image')
     currentframe = 0
@@ -60,7 +71,13 @@ def get_frame():
     c=hour_start*3600+minute_start*60+second_start
     data = 0
     while True:
+        end = datetime.datetime.now()
+        second_end = end.second
+        minute_end = end.minute
+        hour_end = end.hour
+        b = hour_end * 3600 + minute_end * 60 + second_end
         ret, img = camera.read()
+        img1=img
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         faces = face_cascade.detectMultiScale(gray, scaleFactor=1.5, minNeighbors=5)
         faces = sorted(faces, key=lambda x: x[2] * x[3],
@@ -74,52 +91,39 @@ def get_frame():
             stroke = 2
             end_cord_x = x + w
             end_cord_y = y + h
+            font = cv2.FONT_HERSHEY_SIMPLEX
+            stroke = 2
+            if currentframe!=5:
+                cv2.putText(img1, "Processing", (150,100), font, 2, color, stroke, cv2.LINE_AA)
+            else:
+                cv2.putText(img1, "Done", (240, 100), font, 2, color, stroke, cv2.LINE_AA)
+
         imgencode = cv2.imencode('.jpg',img )[1]
         stringData = imgencode.tostring()
         yield (b'--frame\r\n'b'Content-Type: text/plain\r\n\r\n' + stringData + b'\r\n')
-        end = datetime.datetime.now()
-        second_end = end.second
-        minute_end=end.minute
-        hour_end=end.hour
-        b=hour_end*3600+minute_end*60+second_end
 
-        if (b-c) == 5:
-            if currentframe !=5:
+        if currentframe !=5:
+            if b - c == 2:
                 if len(faces) == 1:
                     face=faces[0]
                     x, y, w, h = face
                     image=img[y:y+h,x:x+w]
-                    # lưu lại những điểm của khuôn mặt
+                # lưu lại những điểm của khuôn mặt
                     name = './Image/' + a + '/' + str(currentframe) + '.jpg'
                     print('Creating...' + name)
                     cv2.imwrite(name, image)
                     currentframe += 1
-            else:
-                break
+                    c=b
+        else:
+            break
 
     face_training.train()
     face_training.eye_train()
     del (camera)
 
 
-"""def indexscreen(request):
-    try:
-        return render(request,'login/screen.html')
-    except HttpResponseServerError:
-        print('error')
 
 
-@gzip.gzip_page
-def dynamic_stream(request,stream_path="video"):
-    try :
-        return StreamingHttpResponse(get_frame(),content_type="multipart/x-mixed-replace;boundary=frame")
-    except :
-        return "error"
-"""
-global name
-name =""
-global id_check
-id_check=""
 #stream_video
 def video_feed(request):
     try:
@@ -128,36 +132,35 @@ def video_feed(request):
         return "error"
 
 #Login
-class login(View):
-    def get(self,request):
-        return render(request,'login/login.html')
 
-class but_login(View):
+
+class login(View):
     def get(self, request):
-        return render(request, 'login/login_but.html', {'id_check': no.getsensordata()})
+        return render(request, 'login/login.html', {'id_check': no.getsensordata()})
 
     def post(self,request):
         id_check=request.POST.get('id_check')
         try:
             DocGia.objects.get(id_DG=id_check)
-            print(id_check)
             try:
-                c=camera_recognize(id_check)
+                c = camera_recognize(id_check)
                 print("flag",c)
                 if (c==1):
                     return render(request,'login/success.html')
                 else:
-                    return HttpResponse("khuôn mặt ko khớp")
+                    messages.error(request,"Khuôn mặt không khớp")
+                    return render(request,'login/begin.html')
             except:
                 return "error"
         except ObjectDoesNotExist:
-            return HttpResponse("chua đăng ki")
-        #return render(request,'login/login_camera.html')
+            messages.error(request,"ID chưa được đăng kí")
+            return render(request,'login/begin.html')
+
 
 
 #nhận dạng khuôn mặt
 def camera_recognize(check):
-    camera = cv2.VideoCapture(1)
+    camera = cv2.VideoCapture(0)
     face_cascade = cv2.CascadeClassifier('I:\Program Files\Python\Lib\site-packages\cv2\data\haarcascade_frontalface_alt.xml')
     eyes_cascade = cv2.CascadeClassifier('I:\Program Files\Python\Lib\site-packages\cv2\data\haarcascade_eye.xml')
 
@@ -194,28 +197,27 @@ def camera_recognize(check):
         faces = face_cascade.detectMultiScale(frame, scaleFactor=1.5, minNeighbors=5)
         eyes = eyes_cascade.detectMultiScale(frame)
         if(flag ==0):
-            if (b - c) != 10:
-                print(b - c)
+            if (b - c) != 15:
                 for (x, y, w, h) in faces:
                     for(ex,ey,ew,eh) in eyes:
                         roi_gray = gray[y:y + h, x:x + w]  # (cord1-height,cord2-height)
                         capture_eyes = gray[ey:ey + eh, ex:ex + ew]
                         id_, conf = recognizer.predict(roi_gray)
                         temp, eyes_conf = eyes_recognizer.predict(capture_eyes)
-
-                        if conf and eyes_conf:
-                            print("id",id_)
-                            #print("eyes",eyes_conf)
+                        #print("1",flag)
+                        if conf >=25 and conf <=45 and eyes_conf>=120 and eyes_conf <=135:
+                            print("eyes",eyes_conf)
                             print("conf",conf)
+                            #print("2",flag)
                             font = cv2.FONT_HERSHEY_SIMPLEX
                             name = (labels[id_])
-                        #print("name", name)
-                            print(type(check))
-                            print(type(name))
-                            if name==check:
+                            upper_name=name.upper()
+                            #print("name", upper_name)
+                            if upper_name==check:
                                 flag=1
-                                print(1)
-                                break;
+                                #print("trung")
+                    if flag==1:
+                        break;
             else:
                 flag=2
                 break;
@@ -241,7 +243,7 @@ def camera_recognize(check):
 #hiển thị video
 def video_cam_recog(request):
     try:
-        return StreamingHttpResponse(camera_recognize(), content_type='multipart/x-mixed-replace; boundary=frame')
+        return StreamingHttpResponse(get_frame(), content_type='multipart/x-mixed-replace; boundary=frame')
     except:
         return "error"
 

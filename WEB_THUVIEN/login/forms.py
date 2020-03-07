@@ -16,6 +16,6 @@ class Register(forms.ModelForm):
             DocGia.objects.get(id_DG=id_DG)
         except ObjectDoesNotExist:
             return id_DG
-        raise forms.ValidationError("ID đã tồn taị")
+        raise forms.TextInput.ValidationError("ID đã tồn taị")
 
 
