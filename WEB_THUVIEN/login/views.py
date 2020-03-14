@@ -1,10 +1,10 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-from .forms import Register
+from .forms import Register,Sach
 from . import nouden as no
 from django.views import View
 from django.http import StreamingHttpResponse,HttpResponseServerError,HttpResponseRedirect
-from .models import DocGia
+from .models import Book,DocGia,Cart
 import serial
 import numpy as np
 import cv2
@@ -16,13 +16,14 @@ import os
 from django.core.exceptions import ObjectDoesNotExist
 from . import face_training
 from django.contrib import messages
+
 # Create your views here.
 
 global name
 name =""
 global id_check
 id_check=""
-
+id_user="null"
 
 class begin(View):
     def get(self,request):
@@ -140,13 +141,17 @@ class login(View):
 
     def post(self,request):
         id_check=request.POST.get('id_check')
+        global id_user
         try:
             DocGia.objects.get(id_DG=id_check)
             try:
                 c = camera_recognize(id_check)
                 print("flag",c)
                 if (c==1):
-                    return render(request,'login/success.html')
+                    id_user=id_check
+                    print('trung', id_user)
+                    Data_book = {'list_book': Book.objects.all().order_by("-time_create"), 'id_user': id_user}
+                    return render(request, 'cart/list_book.html', Data_book)
                 else:
                     messages.error(request,"Khuôn mặt không khớp")
                     return render(request,'login/begin.html')
@@ -206,8 +211,8 @@ def camera_recognize(check):
                         temp, eyes_conf = eyes_recognizer.predict(capture_eyes)
                         #print("1",flag)
                         if conf >=25 and conf <=45 and eyes_conf>=120 and eyes_conf <=135:
-                            print("eyes",eyes_conf)
-                            print("conf",conf)
+                            #print("eyes",eyes_conf)
+                            #print("conf",conf)
                             #print("2",flag)
                             font = cv2.FONT_HERSHEY_SIMPLEX
                             name = (labels[id_])
@@ -248,3 +253,69 @@ def video_cam_recog(request):
         return "error"
 
 
+#------------------Book------------------#
+class input_book(View):
+    def get(self,request):
+        b=Sach()
+        return render(request,'cart/nhapsach.html',{'b':b,'id_book':no.getsensordata()})
+
+    def post(self,request):
+        b=Sach(request.POST,request.FILES)
+        if b.is_valid():
+            im=b.save(commit=False)
+            im.image_book=request.FILES['image_book']
+            im.save()
+            return render(request,'cart/success.html')
+        else:
+            return render(request,'cart/fail.html')
+
+def list_book(request):
+    print('trung',id_user)
+    Data_book={'list_book':Book.objects.all().order_by("-time_create"),'id_user':id_user}
+    return render(request,'cart/list_book.html',Data_book)
+
+def view_book(request,id):
+    view_book=Book.objects.get(id=id)
+    return render(request,'cart/view_book.html',{'view_book':view_book,'id_user':id_user})
+
+cart={}
+def addcart(request):
+    if request.is_ajax():
+        id=request.POST.get('id')
+        bookDetail=Book.objects.get(id=id)
+        if id in cart.keys():
+            BookCart={
+                'id_book':bookDetail.id_book,
+                'name':bookDetail.title,
+                'image':str(bookDetail.image_book.url),
+            }
+        else:
+            BookCart = {
+                'id_book': bookDetail.id_book,
+                'name': bookDetail.title,
+                'image': str(bookDetail.image_book.url),
+            }
+        cart[id]=BookCart
+        request.session['cart']=cart
+        cartInfo=request.session['cart']
+        return render(request,'cart/addcart.html',{'cart':cartInfo})
+
+class yourcart(View):
+    def get(self,request):
+        return render(request,'cart/yourcart.html')
+
+    def post(self,request):
+        cartInfo=request.session['cart']
+        flag=0
+        for key,value in cartInfo.items():
+            store_cart=Cart(id_user=id_user,id_bor=value['id_book'])
+            store_cart.save()
+            bookDetail = Book.objects.get(id=key)
+            bookDetail.active=False
+            bookDetail.save()
+            no.sendidbook(value['id_book'])
+            flag=flag+1
+        if(flag != 0):
+            return HttpResponse('success')
+        else:
+            return HttpResponse('mươn ko thành công')

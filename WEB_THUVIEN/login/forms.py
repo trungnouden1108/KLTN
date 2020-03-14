@@ -2,7 +2,7 @@ from django import forms
 from django.core.exceptions import ObjectDoesNotExist
 
 
-from .models import DocGia
+from .models import DocGia,Book
 import serial
 
 class Register(forms.ModelForm):
@@ -19,3 +19,15 @@ class Register(forms.ModelForm):
         raise forms.TextInput.ValidationError("ID đã tồn taị")
 
 
+class Sach(forms.ModelForm):
+    class Meta:
+        model=Book
+        fields =('id_book','title','category','description','image_book','active',)
+
+        def clean_idSach(self):
+            id_book = self.cleaned_data['id_book']
+            try:
+                Book.objects.get(id_book=id_book)
+            except ObjectDoesNotExist:
+                return id_book
+            raise forms.ValidationError("ID đã tồn taị")

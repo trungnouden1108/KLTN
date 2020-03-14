@@ -11,5 +11,10 @@ urlpatterns = [
     path('',views.begin.as_view(),name='begin'),
     #path('^/(?P<stream_path>(.*?))/$',views.dynamic_stream,name='videostream'),
     #path('stream/',views.indexscreen),
-
+    #-------book------#
+    path('nhapsach/',views.input_book.as_view(),name='nhapsach'),
+    #path('listbook/',views.list_book,name='listbook'),
+    path('listbook/<int:id>/',views.view_book,name='viewbook'),
+    path('addcart/',views.addcart,name='addcart'),
+    path('yourcart/',views.yourcart.as_view(),name='yourcart'),
 ]

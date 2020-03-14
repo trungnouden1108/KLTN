@@ -7,6 +7,7 @@ except:
 
 
 def getsensordata():
+
     #st = list(str(arduino.readline(), 'utf-8'))
     #return (str(''.join(st[:])))
     while True:
@@ -33,3 +34,18 @@ def getdata():
     e=d.replace("\r","")
     f=e.replace("\n","")
     return f
+
+def sendidbook(id):
+    id_rev=getsensordata()
+    print("id",id)
+    print("id_rev",id_rev)
+    flag=0
+
+    if id==id_rev:
+            flag=2
+            arduino.write(b'y')
+            print("2")
+    else:
+            flag=1
+            arduino.write(b'n')
+            print("flag",flag)
