@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+        <form action="." method="post">
+{% csrf_token %}
+    <div><input type="text" id="tag_id1" name="book_1" placeholder="Sách trả 1"><button type="button" onclick="scanid1()">Scan sách 1</button></div>
+<div><input type="text" id="tag_id2" name="book_2" placeholder="Sách trả 2"><button type="button" onclick="scanid2()">Scan sách 2</button></div>
+<div><input type="text" id="tag_id3" name="book_3" placeholder="Sách trả 3"><button type="button" onclick="scanid3()">Scan sách 3</button></div>
+    <button type="submit">Xác nhận</button>
+</form>
+    <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+    <script type="text/javascript">
+ function scanid1(){
+    $.get("/trasach/", function(data) {
+            console.log(data.tagid1);
+        const a=document.getElementById('tag_id1');
+        a.value=data.tagid1;
+    });
+}
+function scanid2(){
+    $.get("/trasach/", function(data) {
+            console.log(data.tagid1);
+        const a=document.getElementById('tag_id2');
+        a.value=data.tagid1;
+    });
+}
+function scanid3(){
+    $.get("/trasach/", function(data) {
+            console.log(data.tagid1);
+        const a=document.getElementById('tag_id3');
+        a.value=data.tagid1;
+    });
+}
+</script>
+</body>
+</html>

@@ -7,14 +7,14 @@
 <body>
 <div marin-left="auto" margin-right="auto" align="center">
     <p><b>Xin chào: {{ id_user }}</b></p>
-    <a href="{% url 'yourcart' %}"><b>Giỏ hàng</b></a>
+    <a href="{% url 'scan_sach' %}"><b>Mượn sách</b></a>
+    <a href="{% url 'scan_tra' %}"><b>Trả sách</b></a>
 </div>
 {% csrf_token %}
     {% for book in list_book %}
         {% if book.active == True %}
         <h3>Tên: <a href="/listbook/{{book.id}}"> {{ book.title }}</a></h3>
         <p><img src="{{book.image_book.url}}" width="200px" height="100px" /></p>
-        <button onclick="addcart({{book.id}})">Add Cart</button>
         {% endif %}
     {% endfor %}
 </body>

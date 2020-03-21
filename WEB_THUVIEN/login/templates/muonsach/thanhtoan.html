@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<form action="{% url 'thanhtoan' %}" method="post">
+    {% csrf_token %}
+    Bạn đã trả {{i}} cuốn sách sau {{day}} ngày, số tiền thanh toán là <input readonly="readonly" name="tien" value="{{tien}}"></input> đồng
+    <button type="submit">Xác nhận</button>
+</form>
+</body>
+</html>

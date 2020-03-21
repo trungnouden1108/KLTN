@@ -1,7 +1,8 @@
 from django.db import models
 from django.utils import timezone
+import datetime
 import serial
-
+import pytz
 
 # Create your models here.
 class DocGia(models.Model):
@@ -12,8 +13,8 @@ class DocGia(models.Model):
     email_DG = models.EmailField(max_length=200,blank=False,null=False)
     CMND=models.CharField(max_length=20,blank=False,null=False)
     phone=models.CharField(max_length=15,blank=False,null=False)
+    money_user = models.IntegerField(blank=True,default=0)
     time_create=models.DateTimeField(default=timezone.datetime.now())
-
     def __str__(self):
         return self.id_DG
 
@@ -45,8 +46,11 @@ class Book(models.Model):
 # Model Giỏ hàng
 class Cart(models.Model):
     id_user=models.CharField(max_length=10,default=True)
-    id_bor=models.CharField(max_length=10,default='',blank=False,null=False)
-    created_at=models.DateTimeField(default=timezone.datetime.now())
+    id_bor1=models.CharField(max_length=10,default='',blank=True)
+    id_bor2=models.CharField(max_length=10,default='',blank=True)
+    id_bor3=models.CharField(max_length=10,default='',blank=True)
+    tz_hcm = pytz.timezone('Asia/Ho_Chi_Minh')
+    created_at=models.DateTimeField(default=(datetime.datetime.now(tz_hcm)+datetime.timedelta(hours=7)))
 
     def __str__(self):
-        return self.id_bor
+        return self.id_user

@@ -3,19 +3,22 @@ from django.http import HttpResponse
 from .forms import Register,Sach
 from . import nouden as no
 from django.views import View
-from django.http import StreamingHttpResponse,HttpResponseServerError,HttpResponseRedirect
+from django.http import StreamingHttpResponse,HttpResponseServerError,HttpResponseRedirect,JsonResponse
 from .models import Book,DocGia,Cart
 import serial
 import numpy as np
 import cv2
-import datetime
 import pickle
+import datetime
 import time
 from django.views.decorators import gzip
 import os
 from django.core.exceptions import ObjectDoesNotExist
 from . import face_training
 from django.contrib import messages
+import serial
+from django.utils import timezone
+import pytz
 
 # Create your views here.
 
@@ -24,6 +27,7 @@ name =""
 global id_check
 id_check=""
 id_user="null"
+
 
 class begin(View):
     def get(self,request):
@@ -278,7 +282,7 @@ def view_book(request,id):
     view_book=Book.objects.get(id=id)
     return render(request,'cart/view_book.html',{'view_book':view_book,'id_user':id_user})
 
-cart={}
+"""cart={}
 def addcart(request):
     if request.is_ajax():
         id=request.POST.get('id')
@@ -298,9 +302,9 @@ def addcart(request):
         cart[id]=BookCart
         request.session['cart']=cart
         cartInfo=request.session['cart']
-        return render(request,'cart/addcart.html',{'cart':cartInfo})
+        return render(request,'cart/addcart.html',{'cart':cartInfo})"""
 
-class yourcart(View):
+"""class yourcart(View):
     def get(self,request):
         return render(request,'cart/yourcart.html')
 
@@ -319,3 +323,173 @@ class yourcart(View):
             return HttpResponse('success')
         else:
             return HttpResponse('mươn ko thành công')
+"""
+
+def book(request):
+    return render(request,'book/book.html')
+
+
+a=""
+b=""
+c=""
+def scan_id(request):
+    if request.is_ajax():
+        global a
+        try:
+            a = no.getsensordata()
+        except:
+            print("....")
+        context={'tagid1':a,'tagid2':a,'tagid3':a}
+        return JsonResponse(context)
+    else:
+        return HttpResponse("This route only handles AJAX requests")
+
+def trasach(request):
+    if request.is_ajax():
+        global b
+        try:
+            b = no.getsensordata()
+        except:
+            print("....")
+        context={'tagid1':b,'tagid2':b,'tagid3':b}
+        return JsonResponse(context)
+    else:
+        return HttpResponse("This route only handles AJAX requests")
+
+class bor_book(View):
+    def get(self, request):
+        return render(request,'muonsach/muonsach.html',{})
+
+    def post(self,request):
+        flag=0
+        id_book1=request.POST.get('book_1')
+        id_book2=request.POST.get('book_2')
+        id_book3=request.POST.get('book_3')
+        try:
+            Cart.objects.get(id_user=id_user)
+            flag=1
+        except ObjectDoesNotExist:
+            flag=0
+        if flag==1:
+            return HttpResponse("Bạn đã mượn sách rồi, vui lòng trả sách đã mượn thì mới có thể mượn thêm sách")
+        elif flag==0:
+            store_cart = Cart(id_user=id_user, id_bor1=id_book1,id_bor2=id_book2,id_bor3=id_book3)
+            store_cart.save()
+            if(id_book1 !=""):
+                bookDetail = Book.objects.get(id_book=id_book1)
+                bookDetail.active = False
+                bookDetail.save()
+            if(id_book2 !=""):
+                bookDetail = Book.objects.get(id_book=id_book2)
+                bookDetail.active = False
+                bookDetail.save()
+            if(id_book3 !=""):
+                bookDetail = Book.objects.get(id_book=id_book3)
+                bookDetail.active = False
+                bookDetail.save()
+            return HttpResponse("ok")
+
+
+
+class ret_book(View):
+    def get(self, request):
+        return render(request,'muonsach/trasach.html',{})
+    def post(self,request):
+        sum=0
+        flag = 0
+        i=0
+        id_book1 = request.POST.get('book_1')
+        id_book2 = request.POST.get('book_2')
+        id_book3 = request.POST.get('book_3')
+        try:
+            Cart.objects.get(id_user=id_user)
+            flag=1
+        except:
+            flag=0
+        if flag==1:
+            tz_hcm = pytz.timezone('Asia/Ho_Chi_Minh')
+            time_pre=datetime.datetime.now(timezone.utc)+datetime.timedelta(hours=7)
+            print("time_pre",time_pre)
+
+            print()
+            if (id_book1 != ""):
+                bookDetail = Book.objects.get(id_book=id_book1)
+                bookDetail.active = True
+                bookDetail.save()
+                book_bor = Cart.objects.get(id_user=id_user)
+                i=i+1
+                time_cre=book_bor.created_at
+                print("time_create",time_cre)
+                t3=time_pre-time_cre
+                print(t3)
+                sum=sum+no.day(t3.days)
+                if(book_bor.id_bor1==id_book1):
+                    book_bor.id_bor1=""
+                    book_bor.save()
+
+                elif (book_bor.id_bor2==id_book1):
+                    book_bor.id_bor2=""
+                    book_bor.save()
+
+                elif (book_bor.id_bor3==id_book1):
+                    book_bor.id_bor3=""
+                    book_bor.save()
+
+            if (id_book2 != ""):
+                bookDetail = Book.objects.get(id_book=id_book2)
+                bookDetail.active = True
+                bookDetail.save()
+                book_bor = Cart.objects.get(id_user=id_user)
+                i=i+1
+                time_cre = book_bor.created_at
+                print("time_create", time_cre)
+                t3 = time_pre - time_cre
+                sum = sum + no.day(t3.days)
+                if (book_bor.id_bor1 == id_book2):
+                    book_bor.id_bor1 = ""
+                    book_bor.save()
+                elif (book_bor.id_bor2 == id_book2):
+                    book_bor.id_bor2 = ""
+                    book_bor.save()
+                elif (book_bor.id_bor3 == id_book2):
+                    book_bor.id_bor3 = ""
+                    book_bor.save()
+
+            if (id_book3 != ""):
+                bookDetail = Book.objects.get(id_book=id_book3)
+                bookDetail.active = True
+                bookDetail.save()
+                book_bor = Cart.objects.get(id_user=id_user)
+                i=i+1
+                time_cre = book_bor.created_at
+                print("time_create", time_cre)
+                t3 = time_pre - time_cre
+                print(t3)
+                sum = sum + no.day(t3.days)
+                if (book_bor.id_bor1 == id_book3):
+                    book_bor.id_bor1 = ""
+                    book_bor.save()
+                elif (book_bor.id_bor2 == id_book3):
+                    book_bor.id_bor2 = ""
+                    book_bor.save()
+                elif (book_bor.id_bor3 == id_book3):
+                    book_bor.id_bor3 = ""
+                    book_bor.save()
+            check_cart=Cart.objects.get(id_user=id_user)
+            if(check_cart.id_bor1=="" and check_cart.id_bor2=="" and check_cart.id_bor3==""):
+                Cart.objects.filter(id_user=id_user).delete()
+            return render(request,'muonsach/thanhtoan.html',{'i':i,'tien':sum,'day':t3.days})
+        else:
+            return HttpResponse("bạn chưa mượn sách nào")
+
+class thanhtoan(View):
+    def post(self,request):
+        money=request.POST.get('tien')
+        a=int(money)
+        user=DocGia.objects.get(id_DG=id_user)
+        if (user.money_user==0):
+            return HttpResponse("tài khoản của bạn không đủ để thanh toán")
+        else:
+            user.money_user=user.money_user-a
+            user.save()
+        return HttpResponse("thành công")

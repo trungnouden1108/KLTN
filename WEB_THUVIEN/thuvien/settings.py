@@ -125,9 +125,9 @@ STATIC_URL = '/static/'
 
 MEDIA_URL='/image_book/'
 MEDIA_ROOT=os.path.join(BASE_DIR,'image_book')
-"""STATICFILES_DIRS=[
+STATICFILES_DIRS=[
     os.path.join(BASE_DIR,'static')
-]"""
+]
 
 
 MESSAGE_TAGS = {
