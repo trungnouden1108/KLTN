@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <p>Hello</p>
+    <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+    <script type="text/javascript">
+
+    var myVar = setInterval(check,2000);
+        function check() {
+            $.get("/checkbook/", function(data) {
+                console.log(data.id_book);
+        });
+        }
+
+    </script>
+</body>
+</html>

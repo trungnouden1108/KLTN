@@ -56,7 +56,7 @@ def sendidbook(id):
 
     if id==id_rev:
             flag=2
-            arduino.write(b'y')
+            arduino.write("y")
             print("2")
     else:
             flag=1
@@ -88,3 +88,46 @@ def day(a):
     elif a >=7:
         c=(a)*3000
     return c
+
+
+id_check=""
+temp=""
+def checkbook():
+    try:
+        arduino.open()
+    except Exception as e:
+        print("Exception: Opening serial port: " + str(e))
+    global id_check,temp
+    time.sleep(0.5)
+    temp = arduino.readline().decode()
+    c = temp.replace(" ", "")
+    e = c.replace("\r", "")
+    id_check = e.replace("\n", "")
+    print("f",id_check)
+    if id_check != "":
+        arduino.close()
+        return id_check
+
+def sendarduino_1():
+    i=0
+    flag=0
+    try:
+        arduino.open()
+    except Exception as e:
+        print("Exception: Opening serial port: " + str(e))
+    while (i < 5000):
+        arduino.write(b'0')
+        i=i+1
+    arduino.close()
+
+
+def sendarduino_2():
+    i=0
+    try:
+        arduino.open()
+    except Exception as e:
+        print("Exception: Opening serial port: " + str(e))
+    while (i < 5000):
+        arduino.write(b'1')
+        i = i + 1
+    arduino.close()

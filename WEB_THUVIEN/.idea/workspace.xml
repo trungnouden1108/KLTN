@@ -34,10 +34,10 @@
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="I:\Đồ án\WEB_THUVIEN\login\templates\book" />
+      <recent name="I:\Đồ án\WEB_THUVIEN\login\templates\homepage" />
       <recent name="I:\Đồ án\WEB_THUVIEN\login\templates\cart" />
       <recent name="I:\Đồ án\WEB_THUVIEN\login\static" />
       <recent name="I:\Đồ án\WEB_THUVIEN\image_web" />
-      <recent name="I:\Đồ án\WEB_THUVIEN\templates\homepage" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="I:\Đồ án\WEB_THUVIEN\login" />
@@ -80,14 +80,18 @@
       <screen x="0" y="0" width="1366" height="728" />
     </state>
     <state x="244" y="18" key="SettingsEditor/0.0.1366.728@0.0.1366.728" timestamp="1582982294704" />
-    <state x="391" y="193" key="com.intellij.ide.util.TipDialog" timestamp="1584799772552">
+    <state x="391" y="193" key="com.intellij.ide.util.TipDialog" timestamp="1585408214407">
       <screen x="0" y="0" width="1366" height="728" />
     </state>
-    <state x="391" y="193" key="com.intellij.ide.util.TipDialog/0.0.1366.728@0.0.1366.728" timestamp="1584799772552" />
-    <state x="404" y="49" key="search.everywhere.popup" timestamp="1584166623767">
+    <state x="391" y="193" key="com.intellij.ide.util.TipDialog/0.0.1366.728@0.0.1366.728" timestamp="1585408214407" />
+    <state x="391" y="0" width="586" height="728" key="find.popup" timestamp="1585240401571">
       <screen x="0" y="0" width="1366" height="728" />
     </state>
-    <state x="404" y="49" key="search.everywhere.popup/0.0.1366.728@0.0.1366.728" timestamp="1584166623767" />
+    <state x="391" y="0" width="586" height="728" key="find.popup/0.0.1366.728@0.0.1366.728" timestamp="1585240401571" />
+    <state x="404" y="49" key="search.everywhere.popup" timestamp="1585383295842">
+      <screen x="0" y="0" width="1366" height="728" />
+    </state>
+    <state x="404" y="49" key="search.everywhere.popup/0.0.1366.728@0.0.1366.728" timestamp="1585383295842" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

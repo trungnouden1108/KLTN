@@ -38,6 +38,7 @@ class Book(models.Model):
     #price = models.IntegerField(default=0)
     image_book=models.ImageField(upload_to='image_book/',blank=True,null=True)
     active = models.BooleanField(default=True)
+    new=models.BooleanField(default=False,blank=True)
     time_create=models.DateTimeField(default=timezone.datetime.now())
 
     def __str__(self):
@@ -54,3 +55,9 @@ class Cart(models.Model):
 
     def __str__(self):
         return self.id_user
+
+class Check_book(models.Model):
+    id_bor=models.CharField(max_length=10,blank=True,default='')
+
+    def __str__(self):
+        return self.id_bor

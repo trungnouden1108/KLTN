@@ -4,7 +4,7 @@ from .forms import Register,Sach
 from . import nouden as no
 from django.views import View
 from django.http import StreamingHttpResponse,HttpResponseServerError,HttpResponseRedirect,JsonResponse
-from .models import Book,DocGia,Cart
+from .models import Book,DocGia,Cart,Check_book,Category_Book
 import serial
 import numpy as np
 import cv2
@@ -19,7 +19,9 @@ from django.contrib import messages
 import serial
 from django.utils import timezone
 import pytz
-
+from django.db.models import (
+    Count,
+)
 # Create your views here.
 
 global name
@@ -137,8 +139,6 @@ def video_feed(request):
         return "error"
 
 #Login
-
-
 class login(View):
     def get(self, request):
         return render(request, 'login/login.html', {'id_check': no.getsensordata()})
@@ -150,12 +150,14 @@ class login(View):
             DocGia.objects.get(id_DG=id_check)
             try:
                 c = camera_recognize(id_check)
-                print("flag",c)
                 if (c==1):
                     id_user=id_check
-                    print('trung', id_user)
-                    Data_book = {'list_book': Book.objects.all().order_by("-time_create"), 'id_user': id_user}
-                    return render(request, 'cart/list_book.html', Data_book)
+                    user = DocGia.objects.get(id_DG=id_user)
+                    book=Book.objects.all()
+                    book1=book.filter(active=True)
+                    sl=book1.aggregate(Count('id'))
+                    Data = {'list_book': Book.objects.all(),'sl':sl, 'tenDG': user.ten_DG}
+                    return render(request, 'book/book.html', Data)
                 else:
                     messages.error(request,"Khuôn mặt không khớp")
                     return render(request,'login/begin.html')
@@ -213,10 +215,11 @@ def camera_recognize(check):
                         capture_eyes = gray[ey:ey + eh, ex:ex + ew]
                         id_, conf = recognizer.predict(roi_gray)
                         temp, eyes_conf = eyes_recognizer.predict(capture_eyes)
+                        print("eyes", eyes_conf)
+                        print("conf", conf)
                         #print("1",flag)
-                        if conf >=25 and conf <=45 and eyes_conf>=120 and eyes_conf <=135:
-                            #print("eyes",eyes_conf)
-                            #print("conf",conf)
+                        if conf >=20 and conf <=45 and eyes_conf>=100 and eyes_conf <=150:
+
                             #print("2",flag)
                             font = cv2.FONT_HERSHEY_SIMPLEX
                             name = (labels[id_])
@@ -278,9 +281,10 @@ def list_book(request):
     Data_book={'list_book':Book.objects.all().order_by("-time_create"),'id_user':id_user}
     return render(request,'cart/list_book.html',Data_book)
 
-def view_book(request,id):
-    view_book=Book.objects.get(id=id)
-    return render(request,'cart/view_book.html',{'view_book':view_book,'id_user':id_user})
+def detailbook(request,id):
+    user = DocGia.objects.get(id_DG=id_user)
+    detailbook=Book.objects.get(id=id)
+    return render(request,'book/detailbook.html',{'detailbook':detailbook,'tenDG':user.ten_DG})
 
 """cart={}
 def addcart(request):
@@ -326,9 +330,74 @@ def addcart(request):
 """
 
 def book(request):
-    return render(request,'book/book.html')
+    user = DocGia.objects.get(id_DG=id_user)
+    Data={'list_book':Book.objects.all(),'tenDG':user.ten_DG}
+    return render(request,'book/book.html',Data)
 
 
+
+def book_cate1(request):
+    user = DocGia.objects.get(id_DG=id_user)
+    get_cate=Book.objects.filter(category=Category_Book.objects.get(title="Giáo trình"))
+    get_cate2=get_cate.filter(active=True)
+    sl=get_cate2.aggregate(Count('id'))
+    Data={'list_book':Book.objects.filter(category=Category_Book.objects.get(title="Giáo trình")),'sl':sl,'tenDG':user.ten_DG,
+          'list_book1':Book.objects.all()}
+    return render(request,'book/book_cate1.html',Data)
+
+def book_cate2(request):
+    user = DocGia.objects.get(id_DG=id_user)
+    get_cate=Book.objects.filter(category=Category_Book.objects.get(title="Văn học nghệ thuật"))
+    get_cate2=get_cate.filter(active=True)
+    sl=get_cate2.aggregate(Count('id'))
+    Data={'list_book':Book.objects.filter(category=Category_Book.objects.get(title="Văn học nghệ thuật")),'sl':sl,'tenDG':user.ten_DG,
+          'list_book1':Book.objects.all()}
+    return render(request,'book/book_cate2.html',Data)
+
+def book_cate3(request):
+    user = DocGia.objects.get(id_DG=id_user)
+    get_cate=Book.objects.filter(category=Category_Book.objects.get(title="Tâm lý, tâm linh, tôn giáo"))
+    get_cate2 = get_cate.filter(active=True)
+    sl=get_cate2.aggregate(Count('id'))
+    Data={'list_book':Book.objects.filter(category=Category_Book.objects.get(title="Tâm lý, tâm linh, tôn giáo")),'sl':sl,'tenDG':user.ten_DG,
+          'list_book1':Book.objects.all()}
+    return render(request,'book/book_cate3.html',Data)
+
+def book_cate4(request):
+    user = DocGia.objects.get(id_DG=id_user)
+    get_cate=Book.objects.filter(category=Category_Book.objects.get(title="Truyện, tiểu thuyết"))
+    get_cate2 = get_cate.filter(active=True)
+    sl=get_cate2.aggregate(Count('id'))
+    Data={'list_book':Book.objects.filter(category=Category_Book.objects.get(title="Truyện, tiểu thuyết")),'sl':sl,'tenDG':user.ten_DG,
+          'list_book1':Book.objects.all()}
+    return render(request,'book/book_cate4.html',Data)
+
+def book_cate5(request):
+    user = DocGia.objects.get(id_DG=id_user)
+    get_cate=Book.objects.filter(category=Category_Book.objects.get(title="Văn hóa xã hội - Lịch sử"))
+    get_cate2 = get_cate.filter(active=True)
+    sl=get_cate2.aggregate(Count('id'))
+    Data={'list_book':Book.objects.filter(category=Category_Book.objects.get(title="Văn hóa xã hội - Lịch sử")),'sl':sl,'tenDG':user.ten_DG,
+          'list_book1':Book.objects.all()}
+    return render(request,'book/book_cate5.html',Data)
+
+def book_cate6(request):
+    user = DocGia.objects.get(id_DG=id_user)
+    get_cate=Book.objects.filter(category=Category_Book.objects.get(title="Khoa học công nghệ – Kinh tế"))
+    get_cate2 = get_cate.filter(active=True)
+    sl=get_cate2.aggregate(Count('id'))
+    Data={'list_book':Book.objects.filter(category=Category_Book.objects.get(title="Khoa học công nghệ – Kinh tế")),'sl':sl,'tenDG':user.ten_DG,
+          'list_book1':Book.objects.all()}
+    return render(request,'book/book_cate6.html',Data)
+
+def book_cate7(request):
+    user = DocGia.objects.get(id_DG=id_user)
+    get_cate=Book.objects.filter(category=Category_Book.objects.get(title="Chính trị - Pháp luật"))
+    get_cate2 = get_cate.filter(active=True)
+    sl=get_cate2.aggregate(Count('id'))
+    Data={'list_book':Book.objects.filter(category=Category_Book.objects.get(title="Chính trị - Pháp luật")),'sl':sl,'tenDG':user.ten_DG,
+          'list_book1':Book.objects.all()}
+    return render(request,'book/book_cate7.html',Data)
 a=""
 b=""
 c=""
@@ -376,14 +445,20 @@ class bor_book(View):
             store_cart = Cart(id_user=id_user, id_bor1=id_book1,id_bor2=id_book2,id_bor3=id_book3)
             store_cart.save()
             if(id_book1 !=""):
+                check_id=Check_book(id_bor=id_book1)
+                check_id.save()
                 bookDetail = Book.objects.get(id_book=id_book1)
                 bookDetail.active = False
                 bookDetail.save()
             if(id_book2 !=""):
+                check_id = Check_book(id_bor=id_book2)
+                check_id.save()
                 bookDetail = Book.objects.get(id_book=id_book2)
                 bookDetail.active = False
                 bookDetail.save()
             if(id_book3 !=""):
+                check_id = Check_book(id_bor=id_book3)
+                check_id.save()
                 bookDetail = Book.objects.get(id_book=id_book3)
                 bookDetail.active = False
                 bookDetail.save()
@@ -411,11 +486,11 @@ class ret_book(View):
             time_pre=datetime.datetime.now(timezone.utc)+datetime.timedelta(hours=7)
             print("time_pre",time_pre)
 
-            print()
             if (id_book1 != ""):
                 bookDetail = Book.objects.get(id_book=id_book1)
                 bookDetail.active = True
                 bookDetail.save()
+                Check_book.objects.filter(id_bor=id_book1).delete()
                 book_bor = Cart.objects.get(id_user=id_user)
                 i=i+1
                 time_cre=book_bor.created_at
@@ -439,6 +514,7 @@ class ret_book(View):
                 bookDetail = Book.objects.get(id_book=id_book2)
                 bookDetail.active = True
                 bookDetail.save()
+                Check_book.objects.filter(id_bor=id_book2).delete()
                 book_bor = Cart.objects.get(id_user=id_user)
                 i=i+1
                 time_cre = book_bor.created_at
@@ -459,6 +535,7 @@ class ret_book(View):
                 bookDetail = Book.objects.get(id_book=id_book3)
                 bookDetail.active = True
                 bookDetail.save()
+                Check_book.objects.filter(id_bor=id_book3).delete()
                 book_bor = Cart.objects.get(id_user=id_user)
                 i=i+1
                 time_cre = book_bor.created_at
@@ -493,3 +570,32 @@ class thanhtoan(View):
             user.money_user=user.money_user-a
             user.save()
         return HttpResponse("thành công")
+
+
+d=""
+def check_book(request):
+    if request.is_ajax():
+        global d
+        flag=0
+        try:
+            d = no.getsensordata()
+            try:
+                Check_book.objects.get(id_bor=d)
+                flag=1
+            except ObjectDoesNotExist:
+                flag=2
+        except:
+            print("....")
+        if flag==1:
+            no.sendarduino_1()
+            flag=0
+        elif flag==2:
+            no.sendarduino_2()
+            flag=0
+        context={'id_book':d}
+        return JsonResponse(context)
+    else:
+        return HttpResponse("This route only handles AJAX requests")
+
+def testcheck(request):
+    return render(request, 'check/check.html', {})
