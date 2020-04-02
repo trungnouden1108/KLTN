@@ -18,11 +18,7 @@ urlpatterns = [
     path('detailbook/<int:id>/',views.detailbook,name='detailbook'),
     #path('addcart/',views.addcart,name='addcart'),
     #path('yourcart/',views.yourcart.as_view(),name='yourcart'),
-    path('muonsach/',views.scan_id,name='muonsach'),
-    path('trasach/',views.trasach,name='trasach'),
-    path('scan_muon/',views.bor_book.as_view(),name='scan_sach'),
-    path('scan_tra/',views.ret_book.as_view(),name='scan_tra'),
-    path('thanhtoan/',views.thanhtoan.as_view(),name='thanhtoan'),
+
     path('checkbook/',views.check_book,name='checkbook'),
     path('test/',views.testcheck,name='testcheck'),
     path('book/',views.book,name='book'),
@@ -33,4 +29,12 @@ urlpatterns = [
     path('book_vanhoa/',views.book_cate5,name='cate5'),
     path('book_khcn/',views.book_cate6,name='cate6'),
     path('book_chinhtri/',views.book_cate7,name='cate7'),
+
+
+    #-----mượn trả ------ #
+    path('scan_muon/', views.scan_id, name='scan_muon'),
+    path('scan_tra/', views.scan_id, name='scan_tra'),
+    path('muonsach/', views.bor_book.as_view(), name='muonsach'),
+    path('trasach/', views.ret_book.as_view(), name='trasach'),
+    path('thanhtoan/', views.thanhtoan.as_view(), name='thanhtoan'),
 ]

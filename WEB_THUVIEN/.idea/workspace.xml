@@ -28,16 +28,16 @@
   <component name="PropertiesComponent">
     <property name="DefaultHtmlFileTemplate" value="HTML File" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/login/templates/book" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/login/templates/muontra" />
     <property name="settings.editor.selected.configurable" value="configurable.group.project" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="I:\Đồ án\WEB_THUVIEN\login\templates\muontra" />
       <recent name="I:\Đồ án\WEB_THUVIEN\login\templates\book" />
       <recent name="I:\Đồ án\WEB_THUVIEN\login\templates\homepage" />
       <recent name="I:\Đồ án\WEB_THUVIEN\login\templates\cart" />
       <recent name="I:\Đồ án\WEB_THUVIEN\login\static" />
-      <recent name="I:\Đồ án\WEB_THUVIEN\image_web" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="I:\Đồ án\WEB_THUVIEN\login" />
@@ -80,10 +80,10 @@
       <screen x="0" y="0" width="1366" height="728" />
     </state>
     <state x="244" y="18" key="SettingsEditor/0.0.1366.728@0.0.1366.728" timestamp="1582982294704" />
-    <state x="391" y="193" key="com.intellij.ide.util.TipDialog" timestamp="1585408214407">
+    <state x="391" y="193" key="com.intellij.ide.util.TipDialog" timestamp="1585833663041">
       <screen x="0" y="0" width="1366" height="728" />
     </state>
-    <state x="391" y="193" key="com.intellij.ide.util.TipDialog/0.0.1366.728@0.0.1366.728" timestamp="1585408214407" />
+    <state x="391" y="193" key="com.intellij.ide.util.TipDialog/0.0.1366.728@0.0.1366.728" timestamp="1585833663041" />
     <state x="391" y="0" width="586" height="728" key="find.popup" timestamp="1585240401571">
       <screen x="0" y="0" width="1366" height="728" />
     </state>

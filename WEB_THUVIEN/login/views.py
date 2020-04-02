@@ -329,10 +329,14 @@ def addcart(request):
             return HttpResponse('mươn ko thành công')
 """
 
-def book(request):
-    user = DocGia.objects.get(id_DG=id_user)
-    Data={'list_book':Book.objects.all(),'tenDG':user.ten_DG}
-    return render(request,'book/book.html',Data)
+class book(View):
+    def get(self,request):
+        user = DocGia.objects.get(id_DG=id_user)
+        book = Book.objects.all()
+        book1 = book.filter(active=True)
+        sl = book1.aggregate(Count('id'))
+        Data={'list_book':Book.objects.all(),'sl':sl,'tenDG':user.ten_DG}
+        return render(request,'book/book.html',Data)
 
 
 
@@ -401,6 +405,8 @@ def book_cate7(request):
 a=""
 b=""
 c=""
+
+#Scan id
 def scan_id(request):
     if request.is_ajax():
         global a
@@ -413,21 +419,11 @@ def scan_id(request):
     else:
         return HttpResponse("This route only handles AJAX requests")
 
-def trasach(request):
-    if request.is_ajax():
-        global b
-        try:
-            b = no.getsensordata()
-        except:
-            print("....")
-        context={'tagid1':b,'tagid2':b,'tagid3':b}
-        return JsonResponse(context)
-    else:
-        return HttpResponse("This route only handles AJAX requests")
 
 class bor_book(View):
     def get(self, request):
-        return render(request,'muonsach/muonsach.html',{})
+        user = DocGia.objects.get(id_DG=id_user)
+        return render(request,'muontra/muonsach.html',{'tenDG':user.ten_DG,'list_book1':Book.objects.all()})
 
     def post(self,request):
         flag=0
@@ -440,36 +436,77 @@ class bor_book(View):
         except ObjectDoesNotExist:
             flag=0
         if flag==1:
-            return HttpResponse("Bạn đã mượn sách rồi, vui lòng trả sách đã mượn thì mới có thể mượn thêm sách")
+            messages.success(request, "Bạn đã mượn sách rồi, vui lòng trả sách đã mượn thì mới có thể mượn thêm sách")
+            user = DocGia.objects.get(id_DG=id_user)
+            return render(request, 'muontra/muonsach.html', {'tenDG': user.ten_DG, 'list_book1': Book.objects.all()})
         elif flag==0:
+            if(id_book1 !="" and id_book1 == id_book2 and id_book2 == id_book3):
+                user = DocGia.objects.get(id_DG=id_user)
+                messages.error(request,"3 quyển sách trùng nhau")
+                return render (request,'muontra/muonsach.html',{'tenDG': user.ten_DG, 'list_book1': Book.objects.all()})
+            elif (id_book1 != "" and id_book3!="" and id_book2!=""):
+                    if(id_book1 == id_book2 or id_book2 ==id_book3 or id_book1==id_book3):
+                        user = DocGia.objects.get(id_DG=id_user)
+                        messages.error(request, "2 quyển sách trùng nhau")
+                        return render(request, 'muontra/muonsach.html',
+                              {'tenDG': user.ten_DG, 'list_book1': Book.objects.all()})
+            elif (id_book1 == "" and id_book2 == "" and id_book3 == ""):
+                messages.error(request, "Vui lòng scan sách")
+                user = DocGia.objects.get(id_DG=id_user)
+                return render(request, 'muontra/muonsach.html',
+                              {'tenDG': user.ten_DG, 'list_book1': Book.objects.all()})
             store_cart = Cart(id_user=id_user, id_bor1=id_book1,id_bor2=id_book2,id_bor3=id_book3)
             store_cart.save()
             if(id_book1 !=""):
                 check_id=Check_book(id_bor=id_book1)
                 check_id.save()
                 bookDetail = Book.objects.get(id_book=id_book1)
+                if(bookDetail.active==False):
+                    messages.error(request, "Sách đã được mượn rồi")
+                    user = DocGia.objects.get(id_DG=id_user)
+                    return render(request, 'muontra/muonsach.html',
+                                  {'tenDG': user.ten_DG, 'list_book1': Book.objects.all()})
                 bookDetail.active = False
                 bookDetail.save()
             if(id_book2 !=""):
                 check_id = Check_book(id_bor=id_book2)
                 check_id.save()
                 bookDetail = Book.objects.get(id_book=id_book2)
+                if (bookDetail.active == False):
+                    messages.error(request, "Sách đã được mượn rồi")
+                    user = DocGia.objects.get(id_DG=id_user)
+                    return render(request, 'muontra/muonsach.html',
+                                  {'tenDG': user.ten_DG, 'list_book1': Book.objects.all()})
                 bookDetail.active = False
                 bookDetail.save()
             if(id_book3 !=""):
                 check_id = Check_book(id_bor=id_book3)
                 check_id.save()
                 bookDetail = Book.objects.get(id_book=id_book3)
+                if (bookDetail.active == False):
+                    messages.error(request, "Sách đã được mượn rồi")
+                    user = DocGia.objects.get(id_DG=id_user)
+                    return render(request, 'muontra/muonsach.html',
+                                  {'tenDG': user.ten_DG, 'list_book1': Book.objects.all()})
                 bookDetail.active = False
                 bookDetail.save()
-            return HttpResponse("ok")
 
 
+            messages.success(request,"Bạn đã mượn sách thành công")
+            user = DocGia.objects.get(id_DG=id_user)
+            return render(request, 'muontra/muonsach.html', {'tenDG': user.ten_DG, 'list_book1': Book.objects.all()})
 
+temp1=""
+temp2=""
+temp3=""
 class ret_book(View):
     def get(self, request):
-        return render(request,'muonsach/trasach.html',{})
+        user = DocGia.objects.get(id_DG=id_user)
+        return render(request, 'muontra/trasach.html', {'tenDG': user.ten_DG, 'list_book1': Book.objects.all()})
+
     def post(self,request):
+        user = DocGia.objects.get(id_DG=id_user)
+        global temp1,temp2,temp3
         sum=0
         flag = 0
         i=0
@@ -482,15 +519,32 @@ class ret_book(View):
         except:
             flag=0
         if flag==1:
+            if (id_book1 != "" and id_book1 == id_book2 and id_book2 == id_book3):
+                user = DocGia.objects.get(id_DG=id_user)
+                messages.error(request, "3 quyển sách trùng nhau")
+                return render(request, 'muontra/trasach.html',
+                              {'tenDG': user.ten_DG, 'list_book1': Book.objects.all()})
+            elif (id_book1 != "" and id_book3 != "" and id_book2 != ""):
+                if (id_book1 == id_book2 or id_book2 == id_book3 or id_book1 == id_book3):
+                    user = DocGia.objects.get(id_DG=id_user)
+                    messages.error(request, "2 quyển sách trùng nhau")
+                    return render(request, 'muontra/trasach.html',
+                                  {'tenDG': user.ten_DG, 'list_book1': Book.objects.all()})
+            elif (id_book1 == "" and id_book2 == "" and id_book3 == ""):
+                messages.error(request, "Vui lòng scan sách")
+                user = DocGia.objects.get(id_DG=id_user)
+                return render(request, 'muontra/trasach.html',
+                              {'tenDG': user.ten_DG, 'list_book1': Book.objects.all()})
+            check_cart=Cart.objects.get(id_user=id_user)
             tz_hcm = pytz.timezone('Asia/Ho_Chi_Minh')
             time_pre=datetime.datetime.now(timezone.utc)+datetime.timedelta(hours=7)
             print("time_pre",time_pre)
 
             if (id_book1 != ""):
-                bookDetail = Book.objects.get(id_book=id_book1)
-                bookDetail.active = True
-                bookDetail.save()
-                Check_book.objects.filter(id_bor=id_book1).delete()
+                if (check_cart.id_bor1 !=id_book1 and check_cart.id_bor2 !=id_book1 and check_cart.id_bor3 !=id_book1):
+                    messages.error(request,"Sách không khớp")
+                    return render(request,'muontra/trasach.html',{'tenDG': user.ten_DG, 'list_book1': Book.objects.all()})
+                temp1=id_book1
                 book_bor = Cart.objects.get(id_user=id_user)
                 i=i+1
                 time_cre=book_bor.created_at
@@ -498,44 +552,24 @@ class ret_book(View):
                 t3=time_pre-time_cre
                 print(t3)
                 sum=sum+no.day(t3.days)
-                if(book_bor.id_bor1==id_book1):
-                    book_bor.id_bor1=""
-                    book_bor.save()
-
-                elif (book_bor.id_bor2==id_book1):
-                    book_bor.id_bor2=""
-                    book_bor.save()
-
-                elif (book_bor.id_bor3==id_book1):
-                    book_bor.id_bor3=""
-                    book_bor.save()
 
             if (id_book2 != ""):
-                bookDetail = Book.objects.get(id_book=id_book2)
-                bookDetail.active = True
-                bookDetail.save()
-                Check_book.objects.filter(id_bor=id_book2).delete()
+                if (check_cart.id_bor1 !=id_book2 and check_cart.id_bor2 !=id_book2 and check_cart.id_bor3 !=id_book2):
+                    messages.error(request,"Sách trả không khớp")
+                    return render(request,'muontra/trasach.html',{'tenDG': user.ten_DG, 'list_book1': Book.objects.all()})
+                temp2=id_book2
                 book_bor = Cart.objects.get(id_user=id_user)
                 i=i+1
                 time_cre = book_bor.created_at
                 print("time_create", time_cre)
                 t3 = time_pre - time_cre
                 sum = sum + no.day(t3.days)
-                if (book_bor.id_bor1 == id_book2):
-                    book_bor.id_bor1 = ""
-                    book_bor.save()
-                elif (book_bor.id_bor2 == id_book2):
-                    book_bor.id_bor2 = ""
-                    book_bor.save()
-                elif (book_bor.id_bor3 == id_book2):
-                    book_bor.id_bor3 = ""
-                    book_bor.save()
 
             if (id_book3 != ""):
-                bookDetail = Book.objects.get(id_book=id_book3)
-                bookDetail.active = True
-                bookDetail.save()
-                Check_book.objects.filter(id_bor=id_book3).delete()
+                if (check_cart.id_bor1 !=id_book3 and check_cart.id_bor2 !=id_book3 and check_cart.id_bor3 !=id_book3):
+                    messages.success("Sách không khớp")
+                    return render(request,'muontra/trasach.html',{'tenDG': user.ten_DG, 'list_book1': Book.objects.all()})
+                temp3=id_book3
                 book_bor = Cart.objects.get(id_user=id_user)
                 i=i+1
                 time_cre = book_bor.created_at
@@ -543,33 +577,86 @@ class ret_book(View):
                 t3 = time_pre - time_cre
                 print(t3)
                 sum = sum + no.day(t3.days)
-                if (book_bor.id_bor1 == id_book3):
-                    book_bor.id_bor1 = ""
-                    book_bor.save()
-                elif (book_bor.id_bor2 == id_book3):
-                    book_bor.id_bor2 = ""
-                    book_bor.save()
-                elif (book_bor.id_bor3 == id_book3):
-                    book_bor.id_bor3 = ""
-                    book_bor.save()
-            check_cart=Cart.objects.get(id_user=id_user)
-            if(check_cart.id_bor1=="" and check_cart.id_bor2=="" and check_cart.id_bor3==""):
-                Cart.objects.filter(id_user=id_user).delete()
-            return render(request,'muonsach/thanhtoan.html',{'i':i,'tien':sum,'day':t3.days})
+
+
+            return render(request,'muontra/thanhtoan.html',{'tenDG': user.ten_DG, 'list_book1': Book.objects.all(),'i':i,'tien':sum,'day':t3.days})
         else:
-            return HttpResponse("bạn chưa mượn sách nào")
+            messages.error(request,"Bạn chưa mượn sách nào")
+            return render(request,'muontra/trasach.html',{'tenDG': user.ten_DG, 'list_book1': Book.objects.all()})
 
 class thanhtoan(View):
     def post(self,request):
         money=request.POST.get('tien')
         a=int(money)
         user=DocGia.objects.get(id_DG=id_user)
-        if (user.money_user==0):
-            return HttpResponse("tài khoản của bạn không đủ để thanh toán")
+        if (user.money_user==0 and a !=0):
+            messages.error(request,"Tài khoản của bạn không đủ để thanh toán")
+            book = Book.objects.all()
+            book1 = book.filter(active=True)
+            sl = book1.aggregate(Count('id'))
+            return render(request, 'book/book.html', {'tenDG': user.ten_DG, 'sl': sl,
+                                                      'list_book': Book.objects.all()})
         else:
+            if(temp1 !=""):
+                bookDetail = Book.objects.get(id_book=temp1)
+                bookDetail.active = True
+                bookDetail.save()
+                Check_book.objects.filter(id_bor=temp1).delete()
+                book_bor = Cart.objects.get(id_user=id_user)
+                if (book_bor.id_bor1 == temp1):
+                    book_bor.id_bor1 = ""
+                    book_bor.save()
+
+                elif (book_bor.id_bor2 == temp1):
+                    book_bor.id_bor2 = ""
+                    book_bor.save()
+
+                elif (book_bor.id_bor3 == temp1):
+                    book_bor.id_bor3 = ""
+                    book_bor.save()
+
+            if(temp2 !=""):
+                bookDetail = Book.objects.get(id_book=temp2)
+                bookDetail.active = True
+                bookDetail.save()
+                Check_book.objects.filter(id_bor=temp2).delete()
+                book_bor = Cart.objects.get(id_user=id_user)
+                if (book_bor.id_bor1 == temp2):
+                    book_bor.id_bor1 = ""
+                    book_bor.save()
+                elif (book_bor.id_bor2 == temp2):
+                    book_bor.id_bor2 = ""
+                    book_bor.save()
+                elif (book_bor.id_bor3 == temp2):
+                    book_bor.id_bor3 = ""
+                    book_bor.save()
+
+            if(temp3 !=""):
+                bookDetail = Book.objects.get(id_book=temp3)
+                bookDetail.active = True
+                bookDetail.save()
+                Check_book.objects.filter(id_bor=temp3).delete()
+                book_bor = Cart.objects.get(id_user=id_user)
+                if (book_bor.id_bor1 == temp3):
+                    book_bor.id_bor1 = ""
+                    book_bor.save()
+                elif (book_bor.id_bor2 == temp3):
+                    book_bor.id_bor2 = ""
+                    book_bor.save()
+                elif (book_bor.id_bor3 == temp3):
+                    book_bor.id_bor3 = ""
+                    book_bor.save()
+
+            check_cart = Cart.objects.get(id_user=id_user)
+            if (check_cart.id_bor1 == "" and check_cart.id_bor2 == "" and check_cart.id_bor3 == ""):
+                Cart.objects.filter(id_user=id_user).delete()
             user.money_user=user.money_user-a
             user.save()
-        return HttpResponse("thành công")
+        messages.success(request,"Trả sách thành công")
+        book = Book.objects.all()
+        book1 = book.filter(active=True)
+        sl = book1.aggregate(Count('id'))
+        return render(request, 'book/book.html', {'tenDG': user.ten_DG,'sl':sl,'list_book':Book.objects.all()})
 
 
 d=""
@@ -599,3 +686,4 @@ def check_book(request):
 
 def testcheck(request):
     return render(request, 'check/check.html', {})
+

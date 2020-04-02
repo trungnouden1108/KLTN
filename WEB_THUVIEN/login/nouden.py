@@ -27,6 +27,7 @@ def getsensordata():
         e = c.replace("\r", "")
         id = e.replace("\n", "")
         print("f",id)
+        time.sleep(0.5)
         if id != "":
             break;
     arduino.close()
