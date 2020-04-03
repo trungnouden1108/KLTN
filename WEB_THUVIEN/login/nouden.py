@@ -23,12 +23,15 @@ def getsensordata():
     while True:
         a = arduino.readline().decode()
     # b=str(a,encode='utf-8')
+        time.sleep(0.25)
         c = a.replace(" ", "")
         e = c.replace("\r", "")
         id = e.replace("\n", "")
         print("f",id)
-        time.sleep(0.5)
+        print(type(id))
+        time.sleep(0.25)
         if id != "":
+            time.sleep(0.125)
             break;
     arduino.close()
     return id

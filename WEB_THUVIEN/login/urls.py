@@ -37,4 +37,7 @@ urlpatterns = [
     path('muonsach/', views.bor_book.as_view(), name='muonsach'),
     path('trasach/', views.ret_book.as_view(), name='trasach'),
     path('thanhtoan/', views.thanhtoan.as_view(), name='thanhtoan'),
+
+    #-----contact------#
+    path('contact/',views.contact.as_view(),name='contact'),
 ]

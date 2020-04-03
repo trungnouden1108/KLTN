@@ -1678,3 +1678,21 @@ select option
 {
 	margin-right: 0px;
 }
+
+.alert {
+        margin: 0px 400px 0px 400px;
+        padding: 20px;
+        background-color: #33FFFF;
+        color: black;
+}
+
+.closebtn {
+  margin-left: 15px;
+  color: #FF0000;
+  font-weight: bold;
+  float: right;
+  font-size: 22px;
+  line-height: 20px;
+  cursor: pointer;
+  transition: 0.3s;
+}

@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-from .forms import Register,Sach
+from .forms import Register,Sach,Message
 from . import nouden as no
 from django.views import View
 from django.http import StreamingHttpResponse,HttpResponseServerError,HttpResponseRedirect,JsonResponse
@@ -14,6 +14,8 @@ import time
 from django.views.decorators import gzip
 import os
 from django.core.exceptions import ObjectDoesNotExist
+from django.shortcuts import redirect
+
 from . import face_training
 from django.contrib import messages
 import serial
@@ -22,25 +24,27 @@ import pytz
 from django.db.models import (
     Count,
 )
+from .filters import BookFilter
+
 # Create your views here.
 
 global name
 name =""
-global id_check
 id_check=""
-id_user="null"
+id_user=""
 
 
 class begin(View):
     def get(self,request):
+        global id_user
+        id_user=""
         return render(request,'login/begin.html')
 
 
 class register(View):
     def get(self, request):
-        while True:
-            q = Register()
-            return render(request, 'login/register.html', {'f': q, 'id_card': no.getsensordata()})
+        q = Register()
+        return render(request, 'login/register.html', {'f': q, 'id_card': no.getsensordata()})
 
     def post(self,request):
         q=Register(request.POST)
@@ -145,6 +149,7 @@ class login(View):
 
     def post(self,request):
         id_check=request.POST.get('id_check')
+        print("check",id_check)
         global id_user
         try:
             DocGia.objects.get(id_DG=id_check)
@@ -157,7 +162,7 @@ class login(View):
                     book1=book.filter(active=True)
                     sl=book1.aggregate(Count('id'))
                     Data = {'list_book': Book.objects.all(),'sl':sl, 'tenDG': user.ten_DG}
-                    return render(request, 'book/book.html', Data)
+                    return redirect('/book/',Data)
                 else:
                     messages.error(request,"Khuôn mặt không khớp")
                     return render(request,'login/begin.html')
@@ -218,7 +223,7 @@ def camera_recognize(check):
                         print("eyes", eyes_conf)
                         print("conf", conf)
                         #print("1",flag)
-                        if conf >=20 and conf <=45 and eyes_conf>=100 and eyes_conf <=150:
+                        if conf >=20 and conf <=45 and eyes_conf>=100 and eyes_conf <=180:
 
                             #print("2",flag)
                             font = cv2.FONT_HERSHEY_SIMPLEX
@@ -276,15 +281,28 @@ class input_book(View):
         else:
             return render(request,'cart/fail.html')
 
-def list_book(request):
-    print('trung',id_user)
-    Data_book={'list_book':Book.objects.all().order_by("-time_create"),'id_user':id_user}
-    return render(request,'cart/list_book.html',Data_book)
+
 
 def detailbook(request,id):
+    flag=0
+    try:
+        DocGia.objects.get(id_DG=id_user)
+        flag=1
+    except ObjectDoesNotExist:
+        flag=0
+    if flag==0:
+        messages.error(request,"Bạn chưa đăng nhập")
+        return redirect('/')
     user = DocGia.objects.get(id_DG=id_user)
     detailbook=Book.objects.get(id=id)
-    return render(request,'book/detailbook.html',{'detailbook':detailbook,'tenDG':user.ten_DG})
+    book=Book.objects.all()
+    book1 = book.filter(active=True)
+    book_filter = BookFilter(request.GET, queryset=book1)
+    sl=book_filter.qs.count()
+    if book_filter.data:
+        Data = {'form': book_filter.form, 'list_book': book_filter.qs, 'sl': sl, 'tenDG': user.ten_DG,'list_book1':Book.objects.all()}
+        return render(request,'book/book.html', Data)
+    return render(request,'book/detailbook.html',{'detailbook':detailbook,'tenDG':user.ten_DG,'form':book_filter.form,'list_book1':Book.objects.all()})
 
 """cart={}
 def addcart(request):
@@ -329,77 +347,163 @@ def addcart(request):
             return HttpResponse('mươn ko thành công')
 """
 
-class book(View):
-    def get(self,request):
-        user = DocGia.objects.get(id_DG=id_user)
-        book = Book.objects.all()
-        book1 = book.filter(active=True)
-        sl = book1.aggregate(Count('id'))
-        Data={'list_book':Book.objects.all(),'sl':sl,'tenDG':user.ten_DG}
-        return render(request,'book/book.html',Data)
+def book(request):
+    flag1 = 0
+    try:
+        DocGia.objects.get(id_DG=id_user)
+        flag1 = 1
+    except ObjectDoesNotExist:
+        flag1 = 0
+    if flag1 == 0:
+        messages.error(request, "Bạn chưa đăng nhập")
+        return redirect('/')
+    user = DocGia.objects.get(id_DG=id_user)
+    book = Book.objects.all()
+    book1 = book.filter(active=True)
+    book_filter=BookFilter(request.GET,queryset=book1)
+    #sl = book1.aggregate(Count('id'))
+    sl=book_filter.qs.count()
+    Data={'form':book_filter.form,'list_book':book_filter.qs,'sl':sl,'tenDG':user.ten_DG}
+    return render(request,'book/book.html',Data)
+
 
 
 
 def book_cate1(request):
+    flag1 = 0
+    try:
+        DocGia.objects.get(id_DG=id_user)
+        flag1 = 1
+    except ObjectDoesNotExist:
+        flag1 = 0
+    if flag1 == 0:
+        messages.error(request, "Bạn chưa đăng nhập")
+        return redirect('/')
     user = DocGia.objects.get(id_DG=id_user)
     get_cate=Book.objects.filter(category=Category_Book.objects.get(title="Giáo trình"))
     get_cate2=get_cate.filter(active=True)
-    sl=get_cate2.aggregate(Count('id'))
-    Data={'list_book':Book.objects.filter(category=Category_Book.objects.get(title="Giáo trình")),'sl':sl,'tenDG':user.ten_DG,
+    book_filter=BookFilter(request.GET,queryset=get_cate2)
+    sl=book_filter.qs.count()
+    #sl=get_cate2.aggregate(Count('id'))
+    Data={'form':book_filter.form,'list_book':book_filter.qs,'sl':sl,'tenDG':user.ten_DG,
           'list_book1':Book.objects.all()}
     return render(request,'book/book_cate1.html',Data)
 
 def book_cate2(request):
+    flag1 = 0
+    try:
+        DocGia.objects.get(id_DG=id_user)
+        flag1 = 1
+    except ObjectDoesNotExist:
+        flag1 = 0
+    if flag1 == 0:
+        messages.error(request, "Bạn chưa đăng nhập")
+        return redirect('/')
     user = DocGia.objects.get(id_DG=id_user)
     get_cate=Book.objects.filter(category=Category_Book.objects.get(title="Văn học nghệ thuật"))
     get_cate2=get_cate.filter(active=True)
-    sl=get_cate2.aggregate(Count('id'))
-    Data={'list_book':Book.objects.filter(category=Category_Book.objects.get(title="Văn học nghệ thuật")),'sl':sl,'tenDG':user.ten_DG,
+    book_filter = BookFilter(request.GET, queryset=get_cate2)
+    sl = book_filter.qs.count()
+    Data={'form':book_filter.form,'list_book':book_filter.qs,'sl':sl,'tenDG':user.ten_DG,
           'list_book1':Book.objects.all()}
     return render(request,'book/book_cate2.html',Data)
 
 def book_cate3(request):
+    flag1 = 0
+    try:
+        DocGia.objects.get(id_DG=id_user)
+        flag1 = 1
+    except ObjectDoesNotExist:
+        flag1 = 0
+    if flag1 == 0:
+        messages.error(request, "Bạn chưa đăng nhập")
+        return redirect('/')
     user = DocGia.objects.get(id_DG=id_user)
     get_cate=Book.objects.filter(category=Category_Book.objects.get(title="Tâm lý, tâm linh, tôn giáo"))
     get_cate2 = get_cate.filter(active=True)
-    sl=get_cate2.aggregate(Count('id'))
-    Data={'list_book':Book.objects.filter(category=Category_Book.objects.get(title="Tâm lý, tâm linh, tôn giáo")),'sl':sl,'tenDG':user.ten_DG,
+    book_filter = BookFilter(request.GET, queryset=get_cate2)
+    sl = book_filter.qs.count()
+    Data={'form':book_filter.form,'list_book':book_filter.qs,'sl':sl,'tenDG':user.ten_DG,
           'list_book1':Book.objects.all()}
     return render(request,'book/book_cate3.html',Data)
 
 def book_cate4(request):
+    flag1 = 0
+    try:
+        DocGia.objects.get(id_DG=id_user)
+        flag1 = 1
+    except ObjectDoesNotExist:
+        flag1 = 0
+    if flag1 == 0:
+        messages.error(request, "Bạn chưa đăng nhập")
+        return redirect('/')
     user = DocGia.objects.get(id_DG=id_user)
     get_cate=Book.objects.filter(category=Category_Book.objects.get(title="Truyện, tiểu thuyết"))
     get_cate2 = get_cate.filter(active=True)
-    sl=get_cate2.aggregate(Count('id'))
-    Data={'list_book':Book.objects.filter(category=Category_Book.objects.get(title="Truyện, tiểu thuyết")),'sl':sl,'tenDG':user.ten_DG,
+    book_filter = BookFilter(request.GET, queryset=get_cate2)
+    sl = book_filter.qs.count()
+    #sl=get_cate2.aggregate(Count('id'))
+    Data={'form':book_filter.form,'list_book':book_filter.qs,'sl':sl,'tenDG':user.ten_DG,
           'list_book1':Book.objects.all()}
     return render(request,'book/book_cate4.html',Data)
 
 def book_cate5(request):
+    flag1 = 0
+    try:
+        DocGia.objects.get(id_DG=id_user)
+        flag1 = 1
+    except ObjectDoesNotExist:
+        flag1 = 0
+    if flag1 == 0:
+        messages.error(request, "Bạn chưa đăng nhập")
+        return redirect('/')
     user = DocGia.objects.get(id_DG=id_user)
     get_cate=Book.objects.filter(category=Category_Book.objects.get(title="Văn hóa xã hội - Lịch sử"))
     get_cate2 = get_cate.filter(active=True)
-    sl=get_cate2.aggregate(Count('id'))
-    Data={'list_book':Book.objects.filter(category=Category_Book.objects.get(title="Văn hóa xã hội - Lịch sử")),'sl':sl,'tenDG':user.ten_DG,
+    book_filter = BookFilter(request.GET, queryset=get_cate2)
+    sl = book_filter.qs.count()
+    #sl=get_cate2.aggregate(Count('id'))
+    Data={'form':book_filter.form,'list_book':book_filter.qs,'sl':sl,'tenDG':user.ten_DG,
           'list_book1':Book.objects.all()}
     return render(request,'book/book_cate5.html',Data)
 
 def book_cate6(request):
+    flag1 = 0
+    try:
+        DocGia.objects.get(id_DG=id_user)
+        flag1 = 1
+    except ObjectDoesNotExist:
+        flag1 = 0
+    if flag1 == 0:
+        messages.error(request, "Bạn chưa đăng nhập")
+        return redirect('/')
     user = DocGia.objects.get(id_DG=id_user)
     get_cate=Book.objects.filter(category=Category_Book.objects.get(title="Khoa học công nghệ – Kinh tế"))
     get_cate2 = get_cate.filter(active=True)
-    sl=get_cate2.aggregate(Count('id'))
-    Data={'list_book':Book.objects.filter(category=Category_Book.objects.get(title="Khoa học công nghệ – Kinh tế")),'sl':sl,'tenDG':user.ten_DG,
+    book_filter = BookFilter(request.GET, queryset=get_cate2)
+    sl = book_filter.qs.count()
+    #sl=get_cate2.aggregate(Count('id'))
+    Data={'form':book_filter.form,'list_book':book_filter.qs,'sl':sl,'tenDG':user.ten_DG,
           'list_book1':Book.objects.all()}
     return render(request,'book/book_cate6.html',Data)
 
 def book_cate7(request):
+    flag1 = 0
+    try:
+        DocGia.objects.get(id_DG=id_user)
+        flag1 = 1
+    except ObjectDoesNotExist:
+        flag1 = 0
+    if flag1 == 0:
+        messages.error(request, "Bạn chưa đăng nhập")
+        return redirect('/')
     user = DocGia.objects.get(id_DG=id_user)
     get_cate=Book.objects.filter(category=Category_Book.objects.get(title="Chính trị - Pháp luật"))
     get_cate2 = get_cate.filter(active=True)
-    sl=get_cate2.aggregate(Count('id'))
-    Data={'list_book':Book.objects.filter(category=Category_Book.objects.get(title="Chính trị - Pháp luật")),'sl':sl,'tenDG':user.ten_DG,
+    book_filter = BookFilter(request.GET, queryset=get_cate2)
+    sl = book_filter.qs.count()
+    #sl=get_cate2.aggregate(Count('id'))
+    Data={'form':book_filter.form,'list_book':book_filter.qs,'sl':sl,'tenDG':user.ten_DG,
           'list_book1':Book.objects.all()}
     return render(request,'book/book_cate7.html',Data)
 a=""
@@ -422,8 +526,25 @@ def scan_id(request):
 
 class bor_book(View):
     def get(self, request):
+        flag1 = 0
+        try:
+            DocGia.objects.get(id_DG=id_user)
+            flag1 = 1
+        except ObjectDoesNotExist:
+            flag1 = 0
+        if flag1 == 0:
+            messages.error(request, "Bạn chưa đăng nhập")
+            return redirect('/')
         user = DocGia.objects.get(id_DG=id_user)
-        return render(request,'muontra/muonsach.html',{'tenDG':user.ten_DG,'list_book1':Book.objects.all()})
+        book = Book.objects.all()
+        book1 = book.filter(active=True)
+        book_filter = BookFilter(request.GET, queryset=book1)
+        sl = book_filter.qs.count()
+        if book_filter.data:
+            Data = {'form': book_filter.form, 'list_book': book_filter.qs, 'sl': sl, 'tenDG': user.ten_DG,
+                    'list_book1': Book.objects.all()}
+            return render(request, 'book/book.html', Data)
+        return render(request,'muontra/muonsach.html',{'tenDG':user.ten_DG,'list_book1':Book.objects.all(),'form':book_filter.form})
 
     def post(self,request):
         flag=0
@@ -438,73 +559,94 @@ class bor_book(View):
         if flag==1:
             messages.success(request, "Bạn đã mượn sách rồi, vui lòng trả sách đã mượn thì mới có thể mượn thêm sách")
             user = DocGia.objects.get(id_DG=id_user)
-            return render(request, 'muontra/muonsach.html', {'tenDG': user.ten_DG, 'list_book1': Book.objects.all()})
+            return redirect('/muonsach/')
         elif flag==0:
-            if(id_book1 !="" and id_book1 == id_book2 and id_book2 == id_book3):
+            if(id_book1 !="" and id_book2 !="" and id_book2 !="" and id_book1 == id_book2 and id_book2 == id_book3 and id_book1==id_book3):
                 user = DocGia.objects.get(id_DG=id_user)
                 messages.error(request,"3 quyển sách trùng nhau")
-                return render (request,'muontra/muonsach.html',{'tenDG': user.ten_DG, 'list_book1': Book.objects.all()})
-            elif (id_book1 != "" and id_book3!="" and id_book2!=""):
-                    if(id_book1 == id_book2 or id_book2 ==id_book3 or id_book1==id_book3):
-                        user = DocGia.objects.get(id_DG=id_user)
-                        messages.error(request, "2 quyển sách trùng nhau")
-                        return render(request, 'muontra/muonsach.html',
-                              {'tenDG': user.ten_DG, 'list_book1': Book.objects.all()})
+                return redirect('/muonsach/')
+            elif (id_book1 != "" or id_book3!="" or id_book2!=""):
+                if((id_book1 != "" and id_book1 == id_book2) or (id_book2 !="" and id_book2 ==id_book3) or (id_book3 !="" and id_book1==id_book3)):
+                    user = DocGia.objects.get(id_DG=id_user)
+                    messages.error(request, "2 quyển sách trùng nhau")
+                    return redirect('/muonsach/')
+
             elif (id_book1 == "" and id_book2 == "" and id_book3 == ""):
                 messages.error(request, "Vui lòng scan sách")
                 user = DocGia.objects.get(id_DG=id_user)
-                return render(request, 'muontra/muonsach.html',
-                              {'tenDG': user.ten_DG, 'list_book1': Book.objects.all()})
-            store_cart = Cart(id_user=id_user, id_bor1=id_book1,id_bor2=id_book2,id_bor3=id_book3)
-            store_cart.save()
+                return redirect('/muonsach/')
+
+
             if(id_book1 !=""):
-                check_id=Check_book(id_bor=id_book1)
-                check_id.save()
                 bookDetail = Book.objects.get(id_book=id_book1)
-                if(bookDetail.active==False):
+                if (bookDetail.active == False):
                     messages.error(request, "Sách đã được mượn rồi")
                     user = DocGia.objects.get(id_DG=id_user)
-                    return render(request, 'muontra/muonsach.html',
-                                  {'tenDG': user.ten_DG, 'list_book1': Book.objects.all()})
+                    return redirect('/muonsach/')
+                check_id=Check_book(id_bor=id_book1)
+                check_id.save()
+
                 bookDetail.active = False
                 bookDetail.save()
             if(id_book2 !=""):
-                check_id = Check_book(id_bor=id_book2)
-                check_id.save()
                 bookDetail = Book.objects.get(id_book=id_book2)
                 if (bookDetail.active == False):
                     messages.error(request, "Sách đã được mượn rồi")
                     user = DocGia.objects.get(id_DG=id_user)
-                    return render(request, 'muontra/muonsach.html',
-                                  {'tenDG': user.ten_DG, 'list_book1': Book.objects.all()})
+                    return redirect('/muonsach/')
+                check_id = Check_book(id_bor=id_book2)
+                check_id.save()
+
                 bookDetail.active = False
                 bookDetail.save()
             if(id_book3 !=""):
-                check_id = Check_book(id_bor=id_book3)
-                check_id.save()
                 bookDetail = Book.objects.get(id_book=id_book3)
                 if (bookDetail.active == False):
                     messages.error(request, "Sách đã được mượn rồi")
                     user = DocGia.objects.get(id_DG=id_user)
-                    return render(request, 'muontra/muonsach.html',
-                                  {'tenDG': user.ten_DG, 'list_book1': Book.objects.all()})
+                    return redirect('/muonsach/')
+                check_id = Check_book(id_bor=id_book3)
+                check_id.save()
+
                 bookDetail.active = False
                 bookDetail.save()
 
-
+            store_cart = Cart(id_user=id_user, id_bor1=id_book1, id_bor2=id_book2, id_bor3=id_book3)
+            store_cart.save()
             messages.success(request,"Bạn đã mượn sách thành công")
             user = DocGia.objects.get(id_DG=id_user)
-            return render(request, 'muontra/muonsach.html', {'tenDG': user.ten_DG, 'list_book1': Book.objects.all()})
+            return redirect('/muonsach/')
+
 
 temp1=""
 temp2=""
 temp3=""
 class ret_book(View):
     def get(self, request):
+        flag1 = 0
+        try:
+            DocGia.objects.get(id_DG=id_user)
+            flag1 = 1
+        except ObjectDoesNotExist:
+            flag1 = 0
+        if flag1 == 0:
+            messages.error(request, "Bạn chưa đăng nhập")
+            return redirect('/')
         user = DocGia.objects.get(id_DG=id_user)
-        return render(request, 'muontra/trasach.html', {'tenDG': user.ten_DG, 'list_book1': Book.objects.all()})
+        book = Book.objects.all()
+        book1 = book.filter(active=True)
+        book_filter = BookFilter(request.GET, queryset=book1)
+        sl = book_filter.qs.count()
+        if book_filter.data:
+            Data = {'form': book_filter.form, 'list_book': book_filter.qs, 'sl': sl, 'tenDG': user.ten_DG,
+                    'list_book1': Book.objects.all()}
+            return render(request, 'book/book.html', Data)
+        return render(request, 'muontra/trasach.html', {'tenDG': user.ten_DG, 'list_book1': Book.objects.all(),'form':book_filter.form})
 
     def post(self,request):
+        book = Book.objects.all()
+        book1 = book.filter(active=True)
+        book_filter = BookFilter(request.GET, queryset=book1)
         user = DocGia.objects.get(id_DG=id_user)
         global temp1,temp2,temp3
         sum=0
@@ -522,19 +664,20 @@ class ret_book(View):
             if (id_book1 != "" and id_book1 == id_book2 and id_book2 == id_book3):
                 user = DocGia.objects.get(id_DG=id_user)
                 messages.error(request, "3 quyển sách trùng nhau")
-                return render(request, 'muontra/trasach.html',
-                              {'tenDG': user.ten_DG, 'list_book1': Book.objects.all()})
-            elif (id_book1 != "" and id_book3 != "" and id_book2 != ""):
-                if (id_book1 == id_book2 or id_book2 == id_book3 or id_book1 == id_book3):
+                return redirect('/trasach/')
+
+            elif (id_book1 != "" or id_book3 != "" or id_book2 != ""):
+                if ((id_book1 != "" and id_book1 == id_book2) or (id_book2 != "" and id_book2 == id_book3) or (
+                        id_book3 != "" and id_book1 == id_book3)):
                     user = DocGia.objects.get(id_DG=id_user)
                     messages.error(request, "2 quyển sách trùng nhau")
-                    return render(request, 'muontra/trasach.html',
-                                  {'tenDG': user.ten_DG, 'list_book1': Book.objects.all()})
+                    return redirect('/trasach/')
+
             elif (id_book1 == "" and id_book2 == "" and id_book3 == ""):
                 messages.error(request, "Vui lòng scan sách")
                 user = DocGia.objects.get(id_DG=id_user)
-                return render(request, 'muontra/trasach.html',
-                              {'tenDG': user.ten_DG, 'list_book1': Book.objects.all()})
+                return redirect('/trasach/')
+
             check_cart=Cart.objects.get(id_user=id_user)
             tz_hcm = pytz.timezone('Asia/Ho_Chi_Minh')
             time_pre=datetime.datetime.now(timezone.utc)+datetime.timedelta(hours=7)
@@ -543,7 +686,7 @@ class ret_book(View):
             if (id_book1 != ""):
                 if (check_cart.id_bor1 !=id_book1 and check_cart.id_bor2 !=id_book1 and check_cart.id_bor3 !=id_book1):
                     messages.error(request,"Sách không khớp")
-                    return render(request,'muontra/trasach.html',{'tenDG': user.ten_DG, 'list_book1': Book.objects.all()})
+                    return redirect('/trasach/')
                 temp1=id_book1
                 book_bor = Cart.objects.get(id_user=id_user)
                 i=i+1
@@ -556,7 +699,7 @@ class ret_book(View):
             if (id_book2 != ""):
                 if (check_cart.id_bor1 !=id_book2 and check_cart.id_bor2 !=id_book2 and check_cart.id_bor3 !=id_book2):
                     messages.error(request,"Sách trả không khớp")
-                    return render(request,'muontra/trasach.html',{'tenDG': user.ten_DG, 'list_book1': Book.objects.all()})
+                    return redirect('/trasach/')
                 temp2=id_book2
                 book_bor = Cart.objects.get(id_user=id_user)
                 i=i+1
@@ -568,7 +711,7 @@ class ret_book(View):
             if (id_book3 != ""):
                 if (check_cart.id_bor1 !=id_book3 and check_cart.id_bor2 !=id_book3 and check_cart.id_bor3 !=id_book3):
                     messages.success("Sách không khớp")
-                    return render(request,'muontra/trasach.html',{'tenDG': user.ten_DG, 'list_book1': Book.objects.all()})
+                    return redirect('/trasach/')
                 temp3=id_book3
                 book_bor = Cart.objects.get(id_user=id_user)
                 i=i+1
@@ -579,12 +722,31 @@ class ret_book(View):
                 sum = sum + no.day(t3.days)
 
 
-            return render(request,'muontra/thanhtoan.html',{'tenDG': user.ten_DG, 'list_book1': Book.objects.all(),'i':i,'tien':sum,'day':t3.days})
+            return render(request,'muontra/thanhtoan.html',{'tenDG': user.ten_DG, 'list_book1': Book.objects.all(),'i':i,'tien':sum,'day':t3.days,'form':book_filter.form})
         else:
             messages.error(request,"Bạn chưa mượn sách nào")
-            return render(request,'muontra/trasach.html',{'tenDG': user.ten_DG, 'list_book1': Book.objects.all()})
+            return redirect('/trasach/')
 
 class thanhtoan(View):
+    def get(self,request):
+        flag1 = 0
+        try:
+            DocGia.objects.get(id_DG=id_user)
+            flag1 = 1
+        except ObjectDoesNotExist:
+            flag1 = 0
+        if flag1 == 0:
+            messages.error(request, "Bạn chưa đăng nhập")
+            return redirect('/')
+        user = DocGia.objects.get(id_DG=id_user)
+        book = Book.objects.all()
+        book1 = book.filter(active=True)
+        book_filter = BookFilter(request.GET, queryset=book1)
+        sl = book_filter.qs.count()
+        if book_filter.data:
+            Data = {'form': book_filter.form, 'list_book': book_filter.qs, 'sl': sl, 'tenDG': user.ten_DG,
+                    'list_book1': Book.objects.all()}
+            return render(request, 'book/book.html', Data)
     def post(self,request):
         money=request.POST.get('tien')
         a=int(money)
@@ -594,8 +756,7 @@ class thanhtoan(View):
             book = Book.objects.all()
             book1 = book.filter(active=True)
             sl = book1.aggregate(Count('id'))
-            return render(request, 'book/book.html', {'tenDG': user.ten_DG, 'sl': sl,
-                                                      'list_book': Book.objects.all()})
+            return redirect('/trasach/')
         else:
             if(temp1 !=""):
                 bookDetail = Book.objects.get(id_book=temp1)
@@ -656,7 +817,7 @@ class thanhtoan(View):
         book = Book.objects.all()
         book1 = book.filter(active=True)
         sl = book1.aggregate(Count('id'))
-        return render(request, 'book/book.html', {'tenDG': user.ten_DG,'sl':sl,'list_book':Book.objects.all()})
+        return redirect('/book/')
 
 
 d=""
@@ -687,3 +848,33 @@ def check_book(request):
 def testcheck(request):
     return render(request, 'check/check.html', {})
 
+class contact(View):
+    def get(self,request):
+        q=Message()
+        flag1 = 0
+        try:
+            DocGia.objects.get(id_DG=id_user)
+            flag1 = 1
+        except ObjectDoesNotExist:
+            flag1 = 0
+        if flag1 == 0:
+            messages.error(request, "Bạn chưa đăng nhập")
+            return redirect('/')
+        user = DocGia.objects.get(id_DG=id_user)
+        book = Book.objects.all()
+        book1 = book.filter(active=True)
+        book_filter = BookFilter(request.GET, queryset=book1)
+        sl = book_filter.qs.count()
+        if book_filter.data:
+            Data = {'form': book_filter.form, 'list_book': book_filter.qs, 'sl': sl, 'tenDG': user.ten_DG,
+                'list_book1': Book.objects.all()}
+            return render(request, 'book/book.html', Data)
+        return render(request,'contact/contact.html',{'form':book_filter.form,'opi':q,'tenDG':user.ten_DG,'emailDG':user.email_DG,
+                                                  'phone':user.phone})
+
+    def post(self,request):
+        q=Message(request.POST)
+        if q.is_valid():
+            q.save()
+            messages.success(request,"Cảm ơn bạn đã đóng góp ý kiến")
+            return redirect('/book/')

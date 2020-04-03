@@ -46,7 +46,7 @@ class Book(models.Model):
 
 # Model Giỏ hàng
 class Cart(models.Model):
-    id_user=models.CharField(max_length=10,default=True)
+    id_user=models.CharField(max_length=10,default='')
     id_bor1=models.CharField(max_length=10,default='',blank=True)
     id_bor2=models.CharField(max_length=10,default='',blank=True)
     id_bor3=models.CharField(max_length=10,default='',blank=True)
@@ -61,3 +61,13 @@ class Check_book(models.Model):
 
     def __str__(self):
         return self.id_bor
+
+class Contact(models.Model):
+    name = models.CharField(max_length=100,blank=False,null=False)
+    mail = models.EmailField(max_length=200,blank=False,null=False)
+    phone=models.CharField(max_length=15,blank=False,null=False)
+    opinion=models.TextField(max_length=5000,blank=False,null=False)
+
+    def __str__(self):
+        return self.name
+

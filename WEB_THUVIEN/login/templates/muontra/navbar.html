@@ -9,7 +9,7 @@
 			<div class="container">
 				<div class="row">
 					<div class="col d-flex flex-row">
-						<div class="top_bar_contact_item"><div class="top_bar_icon"><img src="{% static 'images/phone.png' %}" alt=""></div>085 435 4328</div>
+						<div class="top_bar_contact_item"><div class="top_bar_icon"><img src="{% static 'images/phone.png' %}" alt=""></div>0854354328</div>
 						<div class="top_bar_contact_item"><div class="top_bar_icon"><img src="{% static 'images/mail.png' %}" alt=""></div><a href="{% static 'mailto:dthanhtrung2811@gmail.com' %}">dthanhtrung2811@gmail.com</a></div>
 						<div class="top_bar_content ml-auto">
 							<div class="top_bar_user">
@@ -37,26 +37,10 @@
 					</div>
 
 					<!-- Search -->
-					<div class="col-lg-6 col-12 order-lg-2 order-3 text-lg-left text-right">
-						<div class="header_search">
-							<div class="header_search_content">
-								<div class="header_search_form_container">
-									<form class="header_search_form clearfix" method="get">
-        							{% render_field form.title class="header_search_input" placeholder="Nhập tên sách..." type="search" required="required" %}
-											<div class="custom_dropdown_list">
-												<span class="custom_dropdown_placeholder clc"></span>
-												<ul class="custom_list clc">
-												</ul>
-											</div>
-										<button type="submit" class="header_search_button trans_300" value="Submit"><img src="{% static 'images/search.png' %}" alt=""></button>
-									</form>
-								</div>
-							</div>
-						</div>
-					</div>
+
 
 					<!-- Mượn sách -->
-					<div class="col-lg-4 col-9 order-lg-3 order-2 text-lg-left text-right">
+					<div class="col-lg-7 col-12 order-lg-3 order-2 text-lg-left text-right">
 						<div class="wishlist_cart d-flex flex-row align-items-center justify-content-end">
 							<div class="wishlist d-flex flex-row align-items-center justify-content-end">
 								<div class="wishlist_icon"><img src="{% static 'images/muontra.png' %}" alt=""></div>
@@ -121,10 +105,10 @@
 											<li><a href="{% url 'book' %}">Sách<i class="fas fa-chevron-down"></i></a></li>
 											<li><a href="{% url 'muonsach' %}">Mượn sách<i class="fas fa-chevron-down"></i></a></li>
 											<li><a href="{% url 'trasach' %}">Trả sách<i class="fas fa-chevron-down"></i></a></li>
-											<li><a href="{% url 'contact' %}">Liên hệ<i class="fas fa-chevron-down"></i></a></li>
+											<li><a href="contact.html">Liên hệ<i class="fas fa-chevron-down"></i></a></li>
 										</ul>
 									</li>
-									<li><a href="{% url 'contact' %}">Contact<i class="fas fa-chevron-down"></i></a></li>
+									<li><a href="contact.html">Contact<i class="fas fa-chevron-down"></i></a></li>
 								</ul>
 							</div>
 
@@ -155,9 +139,7 @@
 						<div class="page_menu_content">
 
 							<div class="page_menu_search">
-								<form method="get">
-									{% render_field form.title class="page_menu_search_input" placeholder="Nhập tên sách..." type="search" required="required" %}
-								</form>
+
 							</div>
 							<ul class="page_menu_nav">
 								<li class="page_menu_item">
@@ -165,7 +147,7 @@
 								<li class="page_menu_item"><a href="{% url 'muonsach' %}">Mượn sách<i class="fa fa-angle-down"></i></a></li>
 								<li class="page_menu_item"><a href="{% url 'trasach' %}">Trả sách<i class="fa fa-angle-down"></i></a></li>
 
-								<li class="page_menu_item"><a href="{% url 'contact' %}">contact<i class="fa fa-angle-down"></i></a></li>
+								<li class="page_menu_item"><a href="contact.html">contact<i class="fa fa-angle-down"></i></a></li>
 							</ul>
 							<div class="menu_contact">
 								<div class="menu_contact_item"><div class="menu_contact_icon"><img src="{% static 'images/phone_white.png' %}" alt=""></div>0854354328</div>
