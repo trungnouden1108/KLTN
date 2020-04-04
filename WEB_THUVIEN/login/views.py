@@ -25,7 +25,8 @@ from django.db.models import (
     Count,
 )
 from .filters import BookFilter
-
+from django.conf import settings
+import shutil
 # Create your views here.
 
 global name
@@ -47,9 +48,20 @@ class register(View):
         return render(request, 'login/register.html', {'f': q, 'id_card': no.getsensordata()})
 
     def post(self,request):
-        q=Register(request.POST)
+        q=Register(request.POST,request.FILES)
         if q.is_valid():
+            a=request.POST.get('id_DG')
             q.save()
+            path="./Image/"+a+'/'
+            dest="./image_book/image_user/"
+            dest1="/image_user/"
+
+            image=os.listdir(path)
+            print(image[0])
+            shutil.copy2(path+image[0],dest)
+            im=DocGia.objects.get(id_DG=a)
+            im.image_user=dest1+image[0]
+            im.save()
             messages.success(request,"Tài khoản được tạo thành công")
             return render(request,'login/begin.html')
         else:
@@ -108,6 +120,8 @@ def get_frame():
                 cv2.putText(img1, "Processing", (150,100), font, 2, color, stroke, cv2.LINE_AA)
             else:
                 cv2.putText(img1, "Done", (240, 100), font, 2, color, stroke, cv2.LINE_AA)
+                cv2.putText(img1, "Done", (240, 100), font, 2, color, stroke, cv2.LINE_AA)
+
 
         imgencode = cv2.imencode('.jpg',img )[1]
         stringData = imgencode.tostring()
@@ -120,7 +134,7 @@ def get_frame():
                     x, y, w, h = face
                     image=img[y:y+h,x:x+w]
                 # lưu lại những điểm của khuôn mặt
-                    name = './Image/' + a + '/' + str(currentframe) + '.jpg'
+                    name = './Image/' + a + '/' + a+str(currentframe) + '.jpg'
                     print('Creating...' + name)
                     cv2.imwrite(name, image)
                     currentframe += 1
@@ -162,7 +176,7 @@ class login(View):
                     book1=book.filter(active=True)
                     sl=book1.aggregate(Count('id'))
                     Data = {'list_book': Book.objects.all(),'sl':sl, 'tenDG': user.ten_DG}
-                    return redirect('/book/',Data)
+                    return redirect('/book/')
                 else:
                     messages.error(request,"Khuôn mặt không khớp")
                     return render(request,'login/begin.html')
@@ -363,7 +377,7 @@ def book(request):
     book_filter=BookFilter(request.GET,queryset=book1)
     #sl = book1.aggregate(Count('id'))
     sl=book_filter.qs.count()
-    Data={'form':book_filter.form,'list_book':book_filter.qs,'sl':sl,'tenDG':user.ten_DG}
+    Data={'form':book_filter.form,'list_book':book_filter.qs,'sl':sl,'tenDG':user.ten_DG,'list_book1':Book.objects.all()}
     return render(request,'book/book.html',Data)
 
 
@@ -556,11 +570,193 @@ class bor_book(View):
             flag=1
         except ObjectDoesNotExist:
             flag=0
-        if flag==1:
-            messages.success(request, "Bạn đã mượn sách rồi, vui lòng trả sách đã mượn thì mới có thể mượn thêm sách")
+        if flag:
+            if (id_book1 != "" or id_book3!="" or id_book2!=""):
+                if((id_book1 != "" and id_book1 == id_book2) or (id_book2 !="" and id_book2 ==id_book3) or (id_book3 !="" and id_book1==id_book3)):
+                    user = DocGia.objects.get(id_DG=id_user)
+                    messages.error(request, "2 quyển sách trùng nhau")
+                    return redirect('/muonsach/')
+            check_cart=Cart.objects.get(id_user=id_user)
+            flag_book=0
+            if (id_book1 != "" ):
+                if(check_cart.id_bor1==""):
+                    if (check_cart.id_bor2 != id_book1 and check_cart.id_bor3!=id_book1):
+                        bookDetail = Book.objects.get(id_book=id_book1)
+                        if (bookDetail.active == False):
+                            messages.error(request, "Sách đã được mượn rồi")
+                            return redirect('/muonsach/')
+                        check_id = Check_book(id_bor=id_book1)
+                        check_id.save()
+                        bookDetail.active = False
+                        bookDetail.save()
+                        check_cart.id_bor1=id_book1
+                        check_cart.create1=datetime.datetime.now(timezone.utc)+datetime.timedelta(hours=7)
+                        check_cart.save()
+                        flag_book=1
+                    if (check_cart.id_bor2 == id_book1 or check_cart.id_bor3==id_book1):
+                        messages.error(request, "Bạn đã mượn sách này rồi")
+                        return redirect('/muonsach/')
+
+                elif check_cart.id_bor2 =="":
+                    if (check_cart.id_bor1 != id_book1 and check_cart.id_bor3!=id_book1):
+                        bookDetail = Book.objects.get(id_book=id_book1)
+                        if (bookDetail.active == False):
+                            messages.error(request, "Sách đã được mượn rồi")
+                            return redirect('/muonsach/')
+                        check_id = Check_book(id_bor=id_book1)
+                        check_id.save()
+                        bookDetail.active = False
+                        bookDetail.save()
+                        check_cart.id_bor2=id_book1
+                        check_cart.create2=datetime.datetime.now(timezone.utc)+datetime.timedelta(hours=7)
+                        check_cart.save()
+                        flag_book=1
+                    if (check_cart.id_bor1 == id_book1 or check_cart.id_bor3==id_book1):
+                        messages.error(request, "Bạn đã mượn sách này rồi")
+                        return redirect('/muonsach/')
+
+                elif check_cart.id_bor3 =="":
+                    if (check_cart.id_bor1 != id_book1 and check_cart.id_bor2!=id_book1):
+                        bookDetail = Book.objects.get(id_book=id_book1)
+                        if (bookDetail.active == False):
+                            messages.error(request, "Sách đã được mượn rồi")
+                            return redirect('/muonsach/')
+                        check_id = Check_book(id_bor=id_book1)
+                        check_id.save()
+                        bookDetail.active = False
+                        bookDetail.save()
+                        check_cart.id_bor3=id_book1
+                        check_cart.create3=datetime.datetime.now(timezone.utc)+datetime.timedelta(hours=7)
+                        check_cart.save()
+                        flag_book=1
+                    if (check_cart.id_bor1 == id_book1 or check_cart.id_bor2==id_book1):
+                        messages.error(request, "Bạn đã mượn sách này rồi")
+                        return redirect('/muonsach/')
+
+            if (id_book2 != "" ):
+                if (check_cart.id_bor1 == ""):
+                    if (check_cart.id_bor2 != id_book2 and check_cart.id_bor3 != id_book2):
+                        bookDetail = Book.objects.get(id_book=id_book2)
+                        if (bookDetail.active == False):
+                            messages.error(request, "Sách đã được mượn rồi")
+                            return redirect('/muonsach/')
+                        check_id = Check_book(id_bor=id_book2)
+                        check_id.save()
+                        bookDetail.active = False
+                        bookDetail.save()
+                        check_cart.id_bor1 = id_book2
+                        check_cart.create1=datetime.datetime.now(timezone.utc)+datetime.timedelta(hours=7)
+                        check_cart.save()
+                        flag_book=1
+
+                    if (check_cart.id_bor2 == id_book2 or check_cart.id_bor3 == id_book2):
+                        messages.error(request, "Bạn đã mượn sách này rồi")
+                        return redirect('/muonsach/')
+
+                elif check_cart.id_bor2 == "":
+                    if (check_cart.id_bor1 != id_book2 and check_cart.id_bor3 != id_book2):
+                        bookDetail = Book.objects.get(id_book=id_book2)
+                        if (bookDetail.active == False):
+                            messages.error(request, "Sách đã được mượn rồi")
+                            return redirect('/muonsach/')
+                        check_id = Check_book(id_bor=id_book2)
+                        check_id.save()
+                        bookDetail.active = False
+                        bookDetail.save()
+                        check_cart.id_bor2 = id_book2
+                        check_cart.create2=datetime.datetime.now(timezone.utc)+datetime.timedelta(hours=7)
+                        check_cart.save()
+                        flag_book=1
+
+                    if (check_cart.id_bor1 == id_book2 or check_cart.id_bor3 == id_book2):
+                        messages.error(request, "Bạn đã mượn sách này rồi")
+                        return redirect('/muonsach/')
+
+                elif check_cart.id_bor3 == "":
+                    if (check_cart.id_bor1 != id_book2 and check_cart.id_bor2 != id_book2):
+                        bookDetail = Book.objects.get(id_book=id_book2)
+                        if (bookDetail.active == False):
+                            messages.error(request, "Sách đã được mượn rồi")
+                            return redirect('/muonsach/')
+                        check_id = Check_book(id_bor=id_book2)
+                        check_id.save()
+                        bookDetail.active = False
+                        bookDetail.save()
+                        check_cart.id_bor3 = id_book2
+                        check_cart.create3=datetime.datetime.now(timezone.utc)+datetime.timedelta(hours=7)
+                        check_cart.save()
+                        flag_book=1
+
+                    if (check_cart.id_bor1 == id_book2 or check_cart.id_bor2 == id_book2):
+                        messages.error(request, "Bạn đã mượn sách này rồi")
+                        return redirect('/muonsach/')
+            if (id_book3 != "" ):
+                if (check_cart.id_bor1 == ""):
+                    if (check_cart.id_bor2 != id_book3 and check_cart.id_bor3 != id_book3):
+                        bookDetail = Book.objects.get(id_book=id_book3)
+                        if (bookDetail.active == False):
+                            messages.error(request, "Sách đã được mượn rồi")
+                            return redirect('/muonsach/')
+                        check_id = Check_book(id_bor=id_book3)
+                        check_id.save()
+                        bookDetail.active = False
+                        bookDetail.save()
+                        check_cart.id_bor1 = id_book3
+                        check_cart.create1=datetime.datetime.now(timezone.utc)+datetime.timedelta(hours=7)
+                        check_cart.save()
+                        flag_book=1
+
+                    if (check_cart.id_bor2 == id_book3 or check_cart.id_bor3 == id_book3):
+                        messages.error(request, "Bạn đã mượn sách này rồi")
+                        return redirect('/muonsach/')
+
+                elif check_cart.id_bor2 == "":
+                    if (check_cart.id_bor1 != id_book3 and check_cart.id_bor3 != id_book3):
+                        bookDetail = Book.objects.get(id_book=id_book3)
+                        if (bookDetail.active == False):
+                            messages.error(request, "Sách đã được mượn rồi")
+                            return redirect('/muonsach/')
+                        check_id = Check_book(id_bor=id_book3)
+                        check_id.save()
+                        bookDetail.active = False
+                        bookDetail.save()
+                        check_cart.id_bor2 = id_book3
+                        check_cart.create2=datetime.datetime.now(timezone.utc)+datetime.timedelta(hours=7)
+                        check_cart.save()
+                        flag_book=1
+
+                    if (check_cart.id_bor1 == id_book3 or check_cart.id_bor3 == id_book3):
+                        messages.error(request, "Bạn đã mượn sách này rồi")
+                        return redirect('/muonsach/')
+
+                elif check_cart.id_bor3 == "":
+                    if (check_cart.id_bor1 != id_book3 and check_cart.id_bor2 != id_book3):
+                        bookDetail = Book.objects.get(id_book=id_book3)
+                        if (bookDetail.active == False):
+                            messages.error(request, "Sách đã được mượn rồi")
+                            return redirect('/muonsach/')
+                        check_id = Check_book(id_bor=id_book3)
+                        check_id.save()
+                        bookDetail.active = False
+                        bookDetail.save()
+                        check_cart.id_bor3 = id_book3
+                        check_cart.create3=datetime.datetime.now(timezone.utc)+datetime.timedelta(hours=7)
+                        check_cart.save()
+                        flag_book=1
+
+                    if (check_cart.id_bor1 == id_book3 or check_cart.id_bor2 == id_book3):
+                        messages.error(request, "Bạn đã mượn sách này rồi")
+                        return redirect('/muonsach/')
+
+            if (flag_book==1):
+                messages.success(request,"Bạn đã mượn sách thành công")
+                return redirect('/muonsach/')
+
+            messages.success(request, "Bạn đã mượn đủ 3 quyển sách rồi, vui lòng trả sách đã mượn thì mới có thể mượn thêm sách")
             user = DocGia.objects.get(id_DG=id_user)
             return redirect('/muonsach/')
         elif flag==0:
+            check_cart = Cart(id_user=id_user)
             if(id_book1 !="" and id_book2 !="" and id_book2 !="" and id_book1 == id_book2 and id_book2 == id_book3 and id_book1==id_book3):
                 user = DocGia.objects.get(id_DG=id_user)
                 messages.error(request,"3 quyển sách trùng nhau")
@@ -585,7 +781,8 @@ class bor_book(View):
                     return redirect('/muonsach/')
                 check_id=Check_book(id_bor=id_book1)
                 check_id.save()
-
+                check_cart.create1 = datetime.datetime.now(timezone.utc) + datetime.timedelta(hours=7)
+                check_cart.save()
                 bookDetail.active = False
                 bookDetail.save()
             if(id_book2 !=""):
@@ -596,7 +793,8 @@ class bor_book(View):
                     return redirect('/muonsach/')
                 check_id = Check_book(id_bor=id_book2)
                 check_id.save()
-
+                check_cart.create2 = datetime.datetime.now(timezone.utc) + datetime.timedelta(hours=7)
+                check_cart.save()
                 bookDetail.active = False
                 bookDetail.save()
             if(id_book3 !=""):
@@ -607,12 +805,16 @@ class bor_book(View):
                     return redirect('/muonsach/')
                 check_id = Check_book(id_bor=id_book3)
                 check_id.save()
-
+                check_cart.create3 = datetime.datetime.now(timezone.utc) + datetime.timedelta(hours=7)
+                check_cart.save()
                 bookDetail.active = False
                 bookDetail.save()
 
-            store_cart = Cart(id_user=id_user, id_bor1=id_book1, id_bor2=id_book2, id_bor3=id_book3)
-            store_cart.save()
+            check_cart.id_user=id_user
+            check_cart.id_bor1=id_book1
+            check_cart.id_bor2=id_book2
+            check_cart.id_bor3=id_book3
+            check_cart.save()
             messages.success(request,"Bạn đã mượn sách thành công")
             user = DocGia.objects.get(id_DG=id_user)
             return redirect('/muonsach/')
@@ -649,9 +851,17 @@ class ret_book(View):
         book_filter = BookFilter(request.GET, queryset=book1)
         user = DocGia.objects.get(id_DG=id_user)
         global temp1,temp2,temp3
-        sum=0
+        sum1=0
+        sum2=0
+        sum3=0
         flag = 0
+        flag_book1=0
+        flag_book2=0
+        flag_book3=0
         i=0
+        t1=0
+        t2=0
+        t3=0
         id_book1 = request.POST.get('book_1')
         id_book2 = request.POST.get('book_2')
         id_book3 = request.POST.get('book_3')
@@ -687,42 +897,119 @@ class ret_book(View):
                 if (check_cart.id_bor1 !=id_book1 and check_cart.id_bor2 !=id_book1 and check_cart.id_bor3 !=id_book1):
                     messages.error(request,"Sách không khớp")
                     return redirect('/trasach/')
-                temp1=id_book1
-                book_bor = Cart.objects.get(id_user=id_user)
-                i=i+1
-                time_cre=book_bor.created_at
-                print("time_create",time_cre)
-                t3=time_pre-time_cre
-                print(t3)
-                sum=sum+no.day(t3.days)
-
+                if (check_cart.id_bor1==id_book1):
+                    temp1=id_book1
+                    book_bor = Cart.objects.get(id_user=id_user)
+                    i=i+1
+                    time_cre1=book_bor.create1
+                    print("time_create",time_cre1)
+                    t1=time_pre-time_cre1
+                    print(t1)
+                    sum1=sum1+no.day(t1.days)
+                    flag_book1=1
+                elif (check_cart.id_bor2==id_book1):
+                    temp1=id_book1
+                    book_bor = Cart.objects.get(id_user=id_user)
+                    i=i+1
+                    time_cre1=book_bor.create2
+                    print("time_create",time_cre1)
+                    t1=time_pre-time_cre1
+                    print(t1)
+                    sum1=sum1+no.day(t1.days)
+                    flag_book1=1
+                elif (check_cart.id_bor3==id_book1):
+                    temp1=id_book1
+                    book_bor = Cart.objects.get(id_user=id_user)
+                    i=i+1
+                    time_cre1=book_bor.create3
+                    print("time_create",time_cre1)
+                    t1=time_pre-time_cre1
+                    print(t1)
+                    sum1=sum1+no.day(t1.days)
+                    flag_book1=1
+            else:
+                t1=time_pre-time_pre
             if (id_book2 != ""):
                 if (check_cart.id_bor1 !=id_book2 and check_cart.id_bor2 !=id_book2 and check_cart.id_bor3 !=id_book2):
                     messages.error(request,"Sách trả không khớp")
                     return redirect('/trasach/')
-                temp2=id_book2
-                book_bor = Cart.objects.get(id_user=id_user)
-                i=i+1
-                time_cre = book_bor.created_at
-                print("time_create", time_cre)
-                t3 = time_pre - time_cre
-                sum = sum + no.day(t3.days)
+                if (check_cart.id_bor1==id_book2):
+                    temp2=id_book2
+                    book_bor = Cart.objects.get(id_user=id_user)
+                    i=i+1
+                    time_cre2=book_bor.create1
+                    print("time_create",time_cre2)
+                    t2=time_pre-time_cre2
+                    print(t2)
+                    sum2=sum2+no.day(t2.days)
+                    flag_book2=1
 
+                elif (check_cart.id_bor2==id_book2):
+                    temp2=id_book2
+                    book_bor = Cart.objects.get(id_user=id_user)
+                    i=i+1
+                    time_cre2=book_bor.create2
+                    print("time_create",time_cre2)
+                    t2=time_pre-time_cre2
+                    print(t2)
+                    sum2=sum2+no.day(t2.days)
+                    flag_book2=1
+
+                elif (check_cart.id_bor3==id_book2):
+                    temp2=id_book2
+                    book_bor = Cart.objects.get(id_user=id_user)
+                    i=i+1
+                    time_cre2=book_bor.create3
+                    print("time_create",time_cre2)
+                    t2=time_pre-time_cre2
+                    print(t2)
+                    sum2=sum2+no.day(t2.days)
+                    flag_book2=1
+            else:
+                t2=time_pre-time_pre
             if (id_book3 != ""):
                 if (check_cart.id_bor1 !=id_book3 and check_cart.id_bor2 !=id_book3 and check_cart.id_bor3 !=id_book3):
                     messages.success("Sách không khớp")
                     return redirect('/trasach/')
-                temp3=id_book3
-                book_bor = Cart.objects.get(id_user=id_user)
-                i=i+1
-                time_cre = book_bor.created_at
-                print("time_create", time_cre)
-                t3 = time_pre - time_cre
-                print(t3)
-                sum = sum + no.day(t3.days)
+                if (check_cart.id_bor1 == id_book3):
+                    temp3 = id_book3
+                    book_bor = Cart.objects.get(id_user=id_user)
+                    i = i + 1
+                    time_cre3 = book_bor.create1
+                    print("time_create", time_cre3)
+                    t3 = time_pre - time_cre3
+                    print(t3)
+                    sum3= sum3 + no.day(t3.days)
+                    flag_book3=1
 
+                elif (check_cart.id_bor2 == id_book3):
+                    temp3 = id_book3
+                    book_bor = Cart.objects.get(id_user=id_user)
+                    i = i + 1
+                    time_cre3 = book_bor.create2
+                    print("time_create", time_cre3)
+                    t3 = time_pre - time_cre3
+                    print(t3)
+                    sum3 = sum3 + no.day(t3.days)
+                    flag_book3=1
 
-            return render(request,'muontra/thanhtoan.html',{'tenDG': user.ten_DG, 'list_book1': Book.objects.all(),'i':i,'tien':sum,'day':t3.days,'form':book_filter.form})
+                elif (check_cart.id_bor3 == id_book3):
+                    temp3 = id_book3
+                    book_bor = Cart.objects.get(id_user=id_user)
+                    i = i + 1
+                    time_cre3 = book_bor.create3
+                    print("time_create", time_cre3)
+                    t3 = time_pre - time_cre3
+                    print(t3)
+                    sum3 = sum3 + no.day(t3.days)
+                    flag_book3=1
+            else:
+                t3=time_pre-time_pre
+            return render(request, 'muontra/thanhtoan.html',
+                              {'tenDG': user.ten_DG, 'list_book1': Book.objects.all(), 'i': i, 'tien1': sum1,'tien2':sum2,'tien3':sum3,'tien':(sum1+sum2+sum3),
+                               'day1': t1.days,'day2':t2.days,'day3':t3.days,'form': book_filter.form,'flag_book1':flag_book1,
+                               'flag_book2':flag_book2,'flag_book3':flag_book3})
+
         else:
             messages.error(request,"Bạn chưa mượn sách nào")
             return redirect('/trasach/')
@@ -878,3 +1165,52 @@ class contact(View):
             q.save()
             messages.success(request,"Cảm ơn bạn đã đóng góp ý kiến")
             return redirect('/book/')
+
+
+def detailuser(request):
+    book = Book.objects.all()
+    user = DocGia.objects.get(id_DG=id_user)
+    try:
+        check_cart=Cart.objects.get(id_user=id_user)
+    except ObjectDoesNotExist:
+        book1 = book.filter(active=True)
+        book_filter = BookFilter(request.GET, queryset=book1)
+        sl = book_filter.qs.count()
+        if book_filter.data:
+            Data = {'form': book_filter.form, 'list_book': book_filter.qs, 'sl': sl, 'tenDG': user.ten_DG,
+                    'list_book1': Book.objects.all()}
+            return render(request, 'book/book.html', Data)
+        name1 = ""
+        name2 = ""
+        name3 = ""
+        Data = {'tenDG': user.ten_DG, 'form': book_filter.form, 'list_book1': Book.objects.all(), 'DG': user,
+                'book1': name1, 'book2': name2, 'book3': name3}
+        return render(request, 'login/detailuser.html', Data)
+    book1 = book.filter(active=True)
+    book_filter = BookFilter(request.GET, queryset=book1)
+    sl = book_filter.qs.count()
+    if book_filter.data:
+        Data = {'form': book_filter.form, 'list_book': book_filter.qs, 'sl': sl, 'tenDG': user.ten_DG,
+                'list_book1': Book.objects.all()}
+        return render(request, 'book/book.html', Data)
+    name1=""
+    name2=""
+    name3=""
+    try:
+        book1=Book.objects.get(id_book=check_cart.id_bor1)
+        name1=book1.title
+    except ObjectDoesNotExist:
+        name1=""
+    try:
+        book2=Book.objects.get(id_book=check_cart.id_bor2)
+        name2=book2.title
+    except ObjectDoesNotExist:
+        name2=""
+    try:
+        book3=Book.objects.get(id_book=check_cart.id_bor3)
+        name3=book3.title
+    except ObjectDoesNotExist:
+        name3=""
+
+    Data={'tenDG': user.ten_DG,'form': book_filter.form,'list_book1': Book.objects.all(),'DG':user,'book1':name1,'book2':name2,'book3':name3}
+    return render(request,'login/detailuser.html',Data)

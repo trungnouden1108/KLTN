@@ -2136,23 +2136,43 @@ select option
             border: 3px solid #33FFCC;
             width: 80%; /* Could be more or less, depending on screen size */
         }
-
+.trung2-content {
+            background-color: #FFFFFF;
+            margin: 45px 300px 100px 50px ; /* 15% from the top and centered */
+            border: 3px solid #33FFCC;
+            width: 120%; /* Could be more or less, depending on screen size */
+        }
+.trung3-content {
+            background-color: #FFFFFF;
+            margin: 0px 300px 50px 0px ; /* 15% from the top and centered */
+            border: 3px solid #33FFCC;
+            width: 145%; /* Could be more or less, depending on screen size */
+        }
 .input_form1{
     margin-left: 10%
     }
-
+.input_form3{
+    margin-left: 20%
+    }
+ .input_form4{
+    margin-left: 40%
+    }
 .container1 {
         padding: 16px;
     }
-
-
-    .imgcontainer1 {
+.container2 {
+        padding: 30px;
+    }
+.container3 {
+        padding: 0px;
+    }
+.imgcontainer1 {
         text-align: center;
         margin: 24px 0 12px 0;
-    }
+}
 
 /* Avatar image */
-    img.avatar {
+img.avatar {
         width: 60%;
         border-radius: 60%;
     }
@@ -2213,7 +2233,25 @@ button:hover {
             text-align: center;
             color: #FF0000;
         }
+.form3 {
+          border: 3px solid #33FFFF;
+          text-align: center;
+          color: #FF0000;
+          width:250px;
+        }
+.form4 {
+          border: 3px solid #33FFFF;
+          text-align: center;
+          color: #FF0000;
+          width:250px;
+        }
+.form2 {
+            border: 3px solid #33FFFF;
+            text-align: center;
+            color: #FF0000;
 
+            width:15%;
+        }
 .alert {
         margin: 0px 400px 0px 400px;
         padding: 20px;
@@ -2230,4 +2268,8 @@ button:hover {
   line-height: 20px;
   cursor: pointer;
   transition: 0.3s;
+}
+
+.line_p{
+    line-height: 20px;
 }

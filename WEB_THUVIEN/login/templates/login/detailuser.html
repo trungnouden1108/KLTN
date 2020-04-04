@@ -16,7 +16,14 @@
 {% endblock %}
 {% block content %}
 <div class="super_container">
-
+	{% if messages %}
+        {% for message in messages %}
+            <div align="center" class="alert">
+            <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+				<h4><strong>{{ message }} </strong></h4>
+            </div>
+        {% endfor %}
+    {% endif %}
 
 	<!-- Single Product -->
 
@@ -26,78 +33,40 @@
 				<!-- Images -->
 				<!-- Selected Image -->
 				<div class="col-lg-5 order-lg-2 order-1">
-					<div class="image_selected"><img src="{% static 'images/hdtra.png' %}" alt=""></div>
+					<div class="image_selected"><img src="{{DG.image_user.url}}" alt=""></div>
 				</div>
 				<!-- Mượn sách -->
 				<div class="col-lg-5 order-3">
-            		<form class="trung2-content" action="{% url 'thanhtoan' %}" method="post">
+            		<form class="trung3-content" action="#">
                 	{% csrf_token %}
-            		<div class="container1">
-						<div class="imgcontainer1">
-            				<img src="../static/image_web/trasach.png" alt="Avatar" class="avatar">
-            			</div>
-						Bạn đã trả <b>{{i}}</b> cuốn sách:
-						{% if flag_book1 == 1 %}
-						   {% if flag_book2 == 1 %}
-								{% if flag_book3 == 1 %}
-						<p>Quyển 1 trả sau <b>{{day1}}</b> ngày, số tiền là <input class="form2" readonly="readonly" name="tien1" value="{{tien1}}"> đồng</p>
-						<p>Quyển 2 trả sau <b>{{day2}}</b> ngày, số tiền là <input class="form2" readonly="readonly" name="tien2" value="{{tien2}}"> đồng</p>
-						<p>Quyển 3 trả sau <b>{{day3}}</b> ngày, số tiền là <input class="form2" readonly="readonly" name="tien3" value="{{tien3}}"> đồng</p>
-								{% endif %}
-							{% endif %}
-						{% endif %}
-						{% if flag_book1 == 1 %}
-							{% if flag_book2 == 0 %}
-								{% if flag_book3 == 0 %}
-						<p>Quyển 1 trả sau <b>{{day1}}</b> ngày, số tiền là <input class="form2" readonly="readonly" name="tien1" value="{{tien1}}"> đồng</p>
-								{% endif %}
-							{% endif %}
-						{% endif %}
-						{% if flag_book1 == 1 %}
-							{% if flag_book2 == 1 %}
-								{% if flag_book3 == 0 %}
-						<p>Quyển 1 trả sau <b>{{day1}}</b> ngày, số tiền là <input class="form2" readonly="readonly" name="tien1" value="{{tien1}}"> đồng</p>
-						<p>Quyển 2 trả sau <b>{{day2}}</b> ngày, số tiền là <input class="form2" readonly="readonly" name="tien2" value="{{tien2}}"> đồng</p>
-								{% endif %}
-							{% endif %}
-						{% endif %}
-						{% if flag_book1 == 1 %}
-							{% if flag_book2 == 0 %}
-								{% if flag_book3 == 1 %}
-						<p>Quyển 1 trả sau <b>{{day1}}</b> ngày, số tiền là <input class="form2" readonly="readonly" name="tien1" value="{{tien1}}"> đồng</p>
-						<p>Quyển 2 trả sau <b>{{day3}}</b> ngày, số tiền là <input class="form2" readonly="readonly" name="tien2" value="{{tien3}}"> đồng</p>
-								{% endif %}
-							{% endif %}
-						{% endif %}
-						{% if flag_book1 == 0 %}
-							{% if flag_book2 == 0 %}
-								{% if flag_book3 == 1 %}
-						<p>Quyển 1 trả sau <b>{{day3}}</b> ngày, số tiền là <input class="form2" readonly="readonly" name="tien1" value="{{tien3}}"> đồng</p>
-								{% endif %}
-							{% endif %}
-						{% endif %}
-						{% if flag_book1 == 0 %}
-							{% if flag_book2 == 1 %}
-								{% if flag_book3 == 1 %}
-						<p>Quyển 1 trả sau <b>{{day2}}</b> ngày, số tiền là <input class="form2" readonly="readonly" name="tien1" value="{{tien2}}"> đồng</p>
-						<p>Quyển 2 trả sau <b>{{day3}}</b> ngày, số tiền là <input class="form2" readonly="readonly" name="tien2" value="{{tien3}}"> đồng</p>
-								{% endif %}
-							{% endif %}
-						{% endif %}
-						{% if flag_book1 == 0 %}
-							{% if flag_book2 == 1 %}
-								{% if flag_book3 == 0 %}
-						<p>Quyển 1 trả sau <b>{{day2}}</b> ngày, số tiền là <input class="form2" readonly="readonly" name="tien1" value="{{tien2}}"> đồng</p>
-								{% endif %}
-							{% endif %}
-						{% endif %}
-						<h4>Tổng số tiền phải thanh toán là <input class="form2" readonly="readonly" name="tien" value="{{tien}}"> đồng</h4>
-
+            		<div class="container3">
+						<h2 align="center">Thông tin chi tiết độc giả</h2>
+                    <hr>
+						<table>
+							<tr>
+								<th>
+                    				<p class="input_form3 line_p"><label><b>ID Độc Giả:</b> </label></p>
+									<p><input  class="input_form3 form3" type="text" readonly="readonly" value="{{DG.id_DG}}"></p>
+									<p class="input_form3 line_p"><label><b>Tên Độc Giả:</b></label></p>
+									<p><input  class="input_form3 form3" type="text" readonly="readonly" value="{{DG.ten_DG}}"></p>
+									<p class="input_form3 line_p"><label><b>Email:</b> </label></p>
+									<p><input  class="input_form3 form3" type="text" readonly="readonly" value="{{DG.email_DG}}"></p>
+									<p class="input_form3 line_p"><label><b>Số điện thoại:</b> </label></p>
+									<p><input  class="input_form3 form3" type="text" readonly="readonly" value="{{DG.phone}}"></p>
+									<p class="input_form3 line_p"><label><b>Số tiền trong tài khoản:</b> </label></p>
+									<p><input  class="input_form3 form3 " type="text" readonly="readonly" value="{{DG.money_user}}"></p>
+								</th>
+								<th>
+									<p class="input_form4 line_p"><label><b>Sách mượn 1:</b></label></p>
+									<p><input  class="input_form4 form4 " type="text" readonly="readonly" value="{{book1}}"></p>
+									<p class="input_form4 line_p"><label><b>Sách mượn 2:</b> </label></p>
+									<p><input  class="input_form4 form4 " type="text" readonly="readonly" value="{{book2}}"></p>
+									<p class="input_form4 line_p"><label><b>Sách mượn 3:</b> </label></p>
+									<p><input  class="input_form4 form4 " type="text" readonly="readonly" value="{{book3}}"></p>
+								</th>
+								</tr>
+							</table>
 					</div>
-						<div class="clearfix1">
-                    <button type="button" onclick="location.href='{% url 'book' %}'" class="cancelbtn">Cancel</button>
-                    <button type="submit" class="signupbtn">Thanh toán</button>
-        			</div>
 					</form>
 
 				</div>
@@ -187,21 +156,21 @@
 <script src="{% static 'js/product_custom.js' %}"></script>
 <script type="text/javascript">
  function scanid1(){
-    $.get("/scan_tra/", function(data) {
+    $.get("/scan_muon/", function(data) {
             console.log(data.tagid1);
         const a=document.getElementById('tag_id1');
         a.value=data.tagid1;
     });
 }
 function scanid2(){
-    $.get("/scan_tra/", function(data) {
+    $.get("/scan_muon/", function(data) {
             console.log(data.tagid1);
         const a=document.getElementById('tag_id2');
         a.value=data.tagid1;
     });
 }
 function scanid3(){
-    $.get("/scan_tra/", function(data) {
+    $.get("/scan_muon/", function(data) {
             console.log(data.tagid1);
         const a=document.getElementById('tag_id3');
         a.value=data.tagid1;

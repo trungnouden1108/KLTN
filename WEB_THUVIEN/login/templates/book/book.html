@@ -166,7 +166,7 @@
 						<div class="owl-carousel owl-theme viewed_slider">
 
 							<!-- Recently Viewed Item -->
-							{% for book in list_book %}
+							{% for book in list_book1 %}
 							{% if book.active == False %}
 							 {% if book.new == True %}
 							<div class="owl-item">
@@ -184,7 +184,7 @@
 							{% endif %}
 							{% endfor %}
 
-							{% for book in list_book %}
+							{% for book in list_book1 %}
 							{% if book.active == False %}
 							 {% if book.new == False %}
 							<div class="owl-item">

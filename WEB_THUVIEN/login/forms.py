@@ -8,7 +8,7 @@ import serial
 class Register(forms.ModelForm):
     class Meta:
         model = DocGia
-        fields=('id_DG','ten_DG','gioitinh','email_DG','CMND','phone',)
+        fields=('id_DG','ten_DG','gioitinh','email_DG','CMND','phone','image_user',)
 
     def clean_idDG(self):
         id_DG=self.cleaned_data['id_DG']

@@ -13,8 +13,9 @@ class DocGia(models.Model):
     email_DG = models.EmailField(max_length=200,blank=False,null=False)
     CMND=models.CharField(max_length=20,blank=False,null=False)
     phone=models.CharField(max_length=15,blank=False,null=False)
+    image_user=models.ImageField(upload_to='image_user/',blank=True,null=True)
     money_user = models.IntegerField(blank=True,default=0)
-    time_create=models.DateTimeField(default=timezone.datetime.now())
+    time_create=models.DateTimeField(auto_now_add=True)
     def __str__(self):
         return self.id_DG
 
@@ -39,19 +40,24 @@ class Book(models.Model):
     image_book=models.ImageField(upload_to='image_book/',blank=True,null=True)
     active = models.BooleanField(default=True)
     new=models.BooleanField(default=False,blank=True)
-    time_create=models.DateTimeField(default=timezone.datetime.now())
+    time_create=models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.id_book
 
 # Model Giỏ hàng
 class Cart(models.Model):
+    tz_hcm = pytz.timezone('Asia/Ho_Chi_Minh')
     id_user=models.CharField(max_length=10,default='')
     id_bor1=models.CharField(max_length=10,default='',blank=True)
+    create1=models.DateTimeField(default=(datetime.datetime.now(tz_hcm)+datetime.timedelta(hours=7)))
     id_bor2=models.CharField(max_length=10,default='',blank=True)
+    create2=models.DateTimeField(default=(datetime.datetime.now(tz_hcm)+datetime.timedelta(hours=7)))
     id_bor3=models.CharField(max_length=10,default='',blank=True)
-    tz_hcm = pytz.timezone('Asia/Ho_Chi_Minh')
-    created_at=models.DateTimeField(default=(datetime.datetime.now(tz_hcm)+datetime.timedelta(hours=7)))
+    create3=models.DateTimeField(default=(datetime.datetime.now(tz_hcm)+datetime.timedelta(hours=7)))
+
+
+    #created_at=models.DateTimeField(default=(datetime.datetime.now(tz_hcm)+datetime.timedelta(hours=7)))
 
     def __str__(self):
         return self.id_user

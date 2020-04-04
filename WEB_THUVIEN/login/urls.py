@@ -11,6 +11,7 @@ urlpatterns = [
     path('',views.begin.as_view(),name='begin'),
     #path('^/(?P<stream_path>(.*?))/$',views.dynamic_stream,name='videostream'),
     #path('stream/',views.indexscreen),
+    path('detailuser/',views.detailuser,name='detailuser'),
 
     #-------book------#
     path('nhapsach/',views.input_book.as_view(),name='nhapsach'),
