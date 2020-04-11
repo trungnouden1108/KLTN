@@ -34,6 +34,22 @@ name =""
 id_check=""
 id_user=""
 
+z=""
+def scan_user(request):
+    if request.is_ajax():
+        global z
+        try:
+            z = no.getiduser()
+        except:
+            print("....")
+        if z=="":
+            print(3)
+            messages.success(request,"Đã hết thời gian chờ, vui lòng scan lại")
+            return redirect('/')
+        context = {'id_user': z}
+        return JsonResponse(context)
+    else:
+        return HttpResponse("This route only handles AJAX requests")
 
 class begin(View):
     def get(self,request):
@@ -41,48 +57,101 @@ class begin(View):
         id_user=""
         return render(request,'login/begin.html')
 
+id_ne=""
+class begin1(View):
+    def get(self,request):
+        global id_ne
+        id_re=id_ne
+        id_ne = ""
+        print("id_re",id_re)
+        path="./image_temp/"
+        dics=os.listdir(path)
+        if id_re!="":
+            try:
+                DocGia.objects.get(id_DG=id_re)
+                for dic in dics:
+                    if dic == id_re:
+                        print(1)
+                        shutil.rmtree('./image_temp/' + dic)
+                        return render(request, 'login/begin.html')
+
+            except ObjectDoesNotExist:
+                try:
+                    for dic in dics:
+                        if dic == id_re:
+                            print(1)
+                            shutil.rmtree('./image_temp/'+dic)
+                            return render(request, 'login/begin.html')
+
+                except OSError:
+                    print("Không xóa được")
+                    return render(request, 'login/begin.html')
+
+        else:
+            global id_user
+            id_user = ""
+            print(2)
+            return render(request, 'login/begin.html')
+
 
 class register(View):
     def get(self, request):
+        global id_ne
+        id_ne= no.getiduser()
+        print("data",id_ne)
+        if id_ne=="":
+            return redirect('/')
         q = Register()
-        return render(request, 'login/register.html', {'f': q, 'id_card': no.getsensordata()})
+        return render(request, 'login/register.html', {'f': q, 'id_card': id_ne})
 
     def post(self,request):
         q=Register(request.POST,request.FILES)
         if q.is_valid():
             a=request.POST.get('id_DG')
-            q.save()
-            path="./Image/"+a+'/'
-            dest="./image_book/image_user/"
-            dest1="/image_user/"
+            try:
+                DocGia.objects.get(id_DG=a)
+                path1 = "./image_temp/"
+                image = os.listdir(path1)
+                shutil.rmtree('./image_temp/' + image[0])
+                messages.error(request,"Thẻ đã được đăng kí")
+                return render(request, 'login/begin.html')
+            except ObjectDoesNotExist:
+                q.save()
+                path="./Image/"+a+'/'
+                dest="./image_book/image_user/"
+                dest1="/image_user/"
+                path1="./image_temp/"
+                dest2="./Image/"
+                shutil.move(path1 + a, dest2)
+                image=os.listdir(path)
+                print(image[0])
+                shutil.copy2(path+image[0],dest)
+                im=DocGia.objects.get(id_DG=a)
+                im.image_user=dest1+image[0]
+                im.save()
+                face_training.train()
+                face_training.eye_train()
+                global id_ne
+                id_ne=""
+                messages.success(request,"Tài khoản được tạo thành công")
+                return render(request,'login/begin.html')
 
-            image=os.listdir(path)
-            print(image[0])
-            shutil.copy2(path+image[0],dest)
-            im=DocGia.objects.get(id_DG=a)
-            im.image_user=dest1+image[0]
-            im.save()
-            messages.success(request,"Tài khoản được tạo thành công")
-            return render(request,'login/begin.html')
-        else:
-            messages.error(request,"ID đã tồn tại")
-            return render(request,'login/begin.html')
 
 
 def get_frame():
     camera = cv2.VideoCapture(0)
     face_cascade = cv2.CascadeClassifier('I:\Program Files\Python\Lib\site-packages\cv2\data\haarcascade_frontalface_alt2.xml')
 
-    a=no.getsensordata()
+    a=id_ne
     b=a
     try:
         #creating a folder named data
-        if os.path.exists('Image/' + b):
-            os.remove('Image/' + b)
-            os.makedirs('Image/' + b)
+        if os.path.exists('image_temp/' + b):
+            os.remove('image_temp/' + b)
+            os.makedirs('image_temp/' + b)
             print("trung")
         else:
-            os.makedirs('Image/' + b)
+            os.makedirs('image_temp/' + b)
     #if not created then raise error
     except OSError:
         print('Error: Creating directory of Image')
@@ -117,6 +186,7 @@ def get_frame():
             font = cv2.FONT_HERSHEY_SIMPLEX
             stroke = 2
             if currentframe!=5:
+                cv2.rectangle(img1,(x,y),(x+w,y+h),(0,255,0),2)
                 cv2.putText(img1, "Processing", (150,100), font, 2, color, stroke, cv2.LINE_AA)
             else:
                 cv2.putText(img1, "Done", (240, 100), font, 2, color, stroke, cv2.LINE_AA)
@@ -128,22 +198,22 @@ def get_frame():
         yield (b'--frame\r\n'b'Content-Type: text/plain\r\n\r\n' + stringData + b'\r\n')
 
         if currentframe !=5:
-            if b - c == 2:
+            if b - c >= 2:
                 if len(faces) == 1:
                     face=faces[0]
                     x, y, w, h = face
                     image=img[y:y+h,x:x+w]
                 # lưu lại những điểm của khuôn mặt
-                    name = './Image/' + a + '/' + a+str(currentframe) + '.jpg'
+                    name = './image_temp/' + a + '/' + a+str(currentframe) + '.jpg'
                     print('Creating...' + name)
                     cv2.imwrite(name, image)
                     currentframe += 1
                     c=b
+
         else:
             break
 
-    face_training.train()
-    face_training.eye_train()
+
     del (camera)
 
 
@@ -159,7 +229,7 @@ def video_feed(request):
 #Login
 class login(View):
     def get(self, request):
-        return render(request, 'login/login.html', {'id_check': no.getsensordata()})
+        return render(request, 'login/login.html')
 
     def post(self,request):
         id_check=request.POST.get('id_check')
@@ -314,9 +384,9 @@ def detailbook(request,id):
     book_filter = BookFilter(request.GET, queryset=book1)
     sl=book_filter.qs.count()
     if book_filter.data:
-        Data = {'form': book_filter.form, 'list_book': book_filter.qs, 'sl': sl, 'tenDG': user.ten_DG,'list_book1':Book.objects.all()}
+        Data = {'form': book_filter.form, 'list_book': book_filter.qs, 'sl': sl, 'tenDG': user.ten_DG,'list_book1':Book.objects.all(),'list_rate':Book.objects.filter(ave_rate__gte=4).order_by('-ave_rate')}
         return render(request,'book/book.html', Data)
-    return render(request,'book/detailbook.html',{'detailbook':detailbook,'tenDG':user.ten_DG,'form':book_filter.form,'list_book1':Book.objects.all()})
+    return render(request,'book/detailbook.html',{'detailbook':detailbook,'tenDG':user.ten_DG,'form':book_filter.form,'list_book1':Book.objects.all(),'list_rate':Book.objects.filter(ave_rate__gte=4).order_by('-ave_rate')})
 
 """cart={}
 def addcart(request):
@@ -377,7 +447,7 @@ def book(request):
     book_filter=BookFilter(request.GET,queryset=book1)
     #sl = book1.aggregate(Count('id'))
     sl=book_filter.qs.count()
-    Data={'form':book_filter.form,'list_book':book_filter.qs,'sl':sl,'tenDG':user.ten_DG,'list_book1':Book.objects.all()}
+    Data={'form':book_filter.form,'list_book':book_filter.qs,'sl':sl,'tenDG':user.ten_DG,'list_book1':Book.objects.all(),'list_rate':Book.objects.filter(ave_rate__gte=4).order_by('-ave_rate')}
     return render(request,'book/book.html',Data)
 
 
@@ -400,7 +470,7 @@ def book_cate1(request):
     sl=book_filter.qs.count()
     #sl=get_cate2.aggregate(Count('id'))
     Data={'form':book_filter.form,'list_book':book_filter.qs,'sl':sl,'tenDG':user.ten_DG,
-          'list_book1':Book.objects.all()}
+          'list_book1':Book.objects.all(),'list_rate':Book.objects.filter(ave_rate__gte=4).order_by('-ave_rate')}
     return render(request,'book/book_cate1.html',Data)
 
 def book_cate2(request):
@@ -419,7 +489,7 @@ def book_cate2(request):
     book_filter = BookFilter(request.GET, queryset=get_cate2)
     sl = book_filter.qs.count()
     Data={'form':book_filter.form,'list_book':book_filter.qs,'sl':sl,'tenDG':user.ten_DG,
-          'list_book1':Book.objects.all()}
+          'list_book1':Book.objects.all(),'list_rate':Book.objects.filter(ave_rate__gte=4).order_by('-ave_rate')}
     return render(request,'book/book_cate2.html',Data)
 
 def book_cate3(request):
@@ -438,7 +508,7 @@ def book_cate3(request):
     book_filter = BookFilter(request.GET, queryset=get_cate2)
     sl = book_filter.qs.count()
     Data={'form':book_filter.form,'list_book':book_filter.qs,'sl':sl,'tenDG':user.ten_DG,
-          'list_book1':Book.objects.all()}
+          'list_book1':Book.objects.all(),'list_rate':Book.objects.filter(ave_rate__gte=4).order_by('-ave_rate')}
     return render(request,'book/book_cate3.html',Data)
 
 def book_cate4(request):
@@ -458,7 +528,7 @@ def book_cate4(request):
     sl = book_filter.qs.count()
     #sl=get_cate2.aggregate(Count('id'))
     Data={'form':book_filter.form,'list_book':book_filter.qs,'sl':sl,'tenDG':user.ten_DG,
-          'list_book1':Book.objects.all()}
+          'list_book1':Book.objects.all(),'list_rate':Book.objects.filter(ave_rate__gte=4).order_by('-ave_rate')}
     return render(request,'book/book_cate4.html',Data)
 
 def book_cate5(request):
@@ -478,7 +548,7 @@ def book_cate5(request):
     sl = book_filter.qs.count()
     #sl=get_cate2.aggregate(Count('id'))
     Data={'form':book_filter.form,'list_book':book_filter.qs,'sl':sl,'tenDG':user.ten_DG,
-          'list_book1':Book.objects.all()}
+          'list_book1':Book.objects.all(),'list_rate':Book.objects.filter(ave_rate__gte=4).order_by('-ave_rate')}
     return render(request,'book/book_cate5.html',Data)
 
 def book_cate6(request):
@@ -498,7 +568,7 @@ def book_cate6(request):
     sl = book_filter.qs.count()
     #sl=get_cate2.aggregate(Count('id'))
     Data={'form':book_filter.form,'list_book':book_filter.qs,'sl':sl,'tenDG':user.ten_DG,
-          'list_book1':Book.objects.all()}
+          'list_book1':Book.objects.all(),'list_rate':Book.objects.filter(ave_rate__gte=4).order_by('-ave_rate')}
     return render(request,'book/book_cate6.html',Data)
 
 def book_cate7(request):
@@ -518,7 +588,7 @@ def book_cate7(request):
     sl = book_filter.qs.count()
     #sl=get_cate2.aggregate(Count('id'))
     Data={'form':book_filter.form,'list_book':book_filter.qs,'sl':sl,'tenDG':user.ten_DG,
-          'list_book1':Book.objects.all()}
+          'list_book1':Book.objects.all(),'list_rate':Book.objects.filter(ave_rate__gte=4).order_by('-ave_rate')}
     return render(request,'book/book_cate7.html',Data)
 a=""
 b=""
@@ -556,9 +626,9 @@ class bor_book(View):
         sl = book_filter.qs.count()
         if book_filter.data:
             Data = {'form': book_filter.form, 'list_book': book_filter.qs, 'sl': sl, 'tenDG': user.ten_DG,
-                    'list_book1': Book.objects.all()}
+                    'list_book1': Book.objects.all(),'list_rate':Book.objects.filter(ave_rate__gte=4).order_by('-ave_rate')}
             return render(request, 'book/book.html', Data)
-        return render(request,'muontra/muonsach.html',{'tenDG':user.ten_DG,'list_book1':Book.objects.all(),'form':book_filter.form})
+        return render(request,'muontra/muonsach.html',{'tenDG':user.ten_DG,'list_book1':Book.objects.all(),'form':book_filter.form,'list_rate':Book.objects.filter(ave_rate__gte=4).order_by('-ave_rate')})
 
     def post(self,request):
         flag=0
@@ -774,7 +844,12 @@ class bor_book(View):
 
 
             if(id_book1 !=""):
-                bookDetail = Book.objects.get(id_book=id_book1)
+                try:
+                    bookDetail = Book.objects.get(id_book=id_book1)
+                except ObjectDoesNotExist:
+                    messages.error(request,"Sách ko có trong thư viện")
+                    return redirect('/muonsach/')
+
                 if (bookDetail.active == False):
                     messages.error(request, "Sách đã được mượn rồi")
                     user = DocGia.objects.get(id_DG=id_user)
@@ -786,7 +861,11 @@ class bor_book(View):
                 bookDetail.active = False
                 bookDetail.save()
             if(id_book2 !=""):
-                bookDetail = Book.objects.get(id_book=id_book2)
+                try:
+                    bookDetail = Book.objects.get(id_book=id_book2)
+                except ObjectDoesNotExist:
+                    messages.error(request, "Sách ko có trong thư viện")
+                    return redirect('/muonsach/')
                 if (bookDetail.active == False):
                     messages.error(request, "Sách đã được mượn rồi")
                     user = DocGia.objects.get(id_DG=id_user)
@@ -798,7 +877,11 @@ class bor_book(View):
                 bookDetail.active = False
                 bookDetail.save()
             if(id_book3 !=""):
-                bookDetail = Book.objects.get(id_book=id_book3)
+                try:
+                    bookDetail = Book.objects.get(id_book=id_book3)
+                except ObjectDoesNotExist:
+                    messages.error(request, "Sách ko có trong thư viện")
+                    return redirect('/muonsach/')
                 if (bookDetail.active == False):
                     messages.error(request, "Sách đã được mượn rồi")
                     user = DocGia.objects.get(id_DG=id_user)
@@ -841,9 +924,9 @@ class ret_book(View):
         sl = book_filter.qs.count()
         if book_filter.data:
             Data = {'form': book_filter.form, 'list_book': book_filter.qs, 'sl': sl, 'tenDG': user.ten_DG,
-                    'list_book1': Book.objects.all()}
+                    'list_book1': Book.objects.all(),'list_rate':Book.objects.filter(ave_rate__gte=4).order_by('-ave_rate')}
             return render(request, 'book/book.html', Data)
-        return render(request, 'muontra/trasach.html', {'tenDG': user.ten_DG, 'list_book1': Book.objects.all(),'form':book_filter.form})
+        return render(request, 'muontra/trasach.html', {'tenDG': user.ten_DG, 'list_book1': Book.objects.all(),'form':book_filter.form,'list_rate':Book.objects.filter(ave_rate__gte=4).order_by('-ave_rate')})
 
     def post(self,request):
         book = Book.objects.all()
@@ -969,7 +1052,7 @@ class ret_book(View):
                 t2=time_pre-time_pre
             if (id_book3 != ""):
                 if (check_cart.id_bor1 !=id_book3 and check_cart.id_bor2 !=id_book3 and check_cart.id_bor3 !=id_book3):
-                    messages.success("Sách không khớp")
+                    messages.success(request,"Sách không khớp")
                     return redirect('/trasach/')
                 if (check_cart.id_bor1 == id_book3):
                     temp3 = id_book3
@@ -1008,11 +1091,12 @@ class ret_book(View):
             return render(request, 'muontra/thanhtoan.html',
                               {'tenDG': user.ten_DG, 'list_book1': Book.objects.all(), 'i': i, 'tien1': sum1,'tien2':sum2,'tien3':sum3,'tien':(sum1+sum2+sum3),
                                'day1': t1.days,'day2':t2.days,'day3':t3.days,'form': book_filter.form,'flag_book1':flag_book1,
-                               'flag_book2':flag_book2,'flag_book3':flag_book3})
+                               'flag_book2':flag_book2,'flag_book3':flag_book3,'list_rate':Book.objects.filter(ave_rate__gte=4).order_by('-ave_rate')})
 
         else:
             messages.error(request,"Bạn chưa mượn sách nào")
             return redirect('/trasach/')
+
 
 class thanhtoan(View):
     def get(self,request):
@@ -1032,7 +1116,7 @@ class thanhtoan(View):
         sl = book_filter.qs.count()
         if book_filter.data:
             Data = {'form': book_filter.form, 'list_book': book_filter.qs, 'sl': sl, 'tenDG': user.ten_DG,
-                    'list_book1': Book.objects.all()}
+                    'list_book1': Book.objects.all(),'list_rate':Book.objects.filter(ave_rate__gte=4).order_by('-ave_rate')}
             return render(request, 'book/book.html', Data)
     def post(self,request):
         money=request.POST.get('tien')
@@ -1104,7 +1188,7 @@ class thanhtoan(View):
         book = Book.objects.all()
         book1 = book.filter(active=True)
         sl = book1.aggregate(Count('id'))
-        return redirect('/book/')
+        return redirect('/rate/')
 
 
 d=""
@@ -1154,7 +1238,7 @@ class contact(View):
         sl = book_filter.qs.count()
         if book_filter.data:
             Data = {'form': book_filter.form, 'list_book': book_filter.qs, 'sl': sl, 'tenDG': user.ten_DG,
-                'list_book1': Book.objects.all()}
+                'list_book1': Book.objects.all(),'list_rate':Book.objects.filter(ave_rate__gte=4).order_by('-ave_rate')}
             return render(request, 'book/book.html', Data)
         return render(request,'contact/contact.html',{'form':book_filter.form,'opi':q,'tenDG':user.ten_DG,'emailDG':user.email_DG,
                                                   'phone':user.phone})
@@ -1178,13 +1262,13 @@ def detailuser(request):
         sl = book_filter.qs.count()
         if book_filter.data:
             Data = {'form': book_filter.form, 'list_book': book_filter.qs, 'sl': sl, 'tenDG': user.ten_DG,
-                    'list_book1': Book.objects.all()}
+                    'list_book1': Book.objects.all(),'list_rate':Book.objects.filter(ave_rate__gte=4).order_by('-ave_rate')}
             return render(request, 'book/book.html', Data)
         name1 = ""
         name2 = ""
         name3 = ""
         Data = {'tenDG': user.ten_DG, 'form': book_filter.form, 'list_book1': Book.objects.all(), 'DG': user,
-                'book1': name1, 'book2': name2, 'book3': name3}
+                'book1': name1, 'book2': name2, 'book3': name3,'list_rate':Book.objects.filter(ave_rate__gte=4).order_by('-ave_rate')}
         return render(request, 'login/detailuser.html', Data)
     book1 = book.filter(active=True)
     book_filter = BookFilter(request.GET, queryset=book1)
@@ -1212,5 +1296,73 @@ def detailuser(request):
     except ObjectDoesNotExist:
         name3=""
 
-    Data={'tenDG': user.ten_DG,'form': book_filter.form,'list_book1': Book.objects.all(),'DG':user,'book1':name1,'book2':name2,'book3':name3}
+    Data={'tenDG': user.ten_DG,'form': book_filter.form,'list_book1': Book.objects.all(),'DG':user,'book1':name1,'book2':name2,'book3':name3,'list_rate':Book.objects.filter(ave_rate__gte=4).order_by('-ave_rate')}
     return render(request,'login/detailuser.html',Data)
+
+class rating(View):
+    def get(self,request):
+        user = DocGia.objects.get(id_DG=id_user)
+        book = Book.objects.all()
+        book1 = book.filter(active=True)
+        book_filter = BookFilter(request.GET, queryset=book1)
+        sl = book_filter.qs.count()
+        name_book1=""
+        name_book2=""
+        name_book3=""
+        if(temp1 != ""):
+            temp_book1=Book.objects.get(id_book=temp1)
+            name_book1=temp_book1.title
+        if (temp2 != ""):
+            temp_book2 = Book.objects.get(id_book=temp2)
+            name_book2 = temp_book2.title
+        if (temp3 != ""):
+            temp_book3 = Book.objects.get(id_book=temp3)
+            name_book3 = temp_book3.title
+        if book_filter.data:
+            Data = {'form': book_filter.form, 'list_book': book_filter.qs, 'sl': sl, 'tenDG': user.ten_DG,
+                'list_book1': Book.objects.all(),'list_rate':Book.objects.filter(ave_rate__gte=4).order_by('-ave_rate')}
+            return render(request, 'book/book.html', Data)
+        else:
+            return render(request,'rate/rate.html',{'name_book1':name_book1,'name_book2':name_book2,'name_book3':name_book3,'form': book_filter.form,'tenDG':user.ten_DG,'list_book1': Book.objects.all(),
+                                                    'list_rate':Book.objects.filter(ave_rate__gte=4).order_by('-ave_rate')})
+
+    def post(self,request):
+
+        try:
+            star1=request.POST.get('star')
+            if star1 is not None:
+                book=Book.objects.get(id_book=temp1)
+                book.rate=book.rate+int(star1)
+                book.vote=book.vote+1
+                book.ave_rate=book.rate//book.vote
+                book.save()
+        except ObjectDoesNotExist:
+            star1=0
+
+        try:
+            star2=request.POST.get('star1')
+            if star2 is not None:
+                book = Book.objects.get(id_book=temp2)
+                book.rate = book.rate + int(star2)
+                book.vote = book.vote + 1
+                book.ave_rate = book.rate // book.vote
+                book.save()
+        except ObjectDoesNotExist:
+            star2=0
+
+        try:
+            star3=request.POST.get('star2')
+            if star3 is not None:
+                book = Book.objects.get(id_book=temp3)
+                book.rate = book.rate + int(star3)
+                book.vote = book.vote + 1
+                book.ave_rate = book.rate // book.vote
+                book.save()
+        except ObjectDoesNotExist:
+            star3=0
+
+        print(star1)
+        print(star2)
+        print(star3)
+        messages.success(request,"Cảm ơn bạn đã đánh giá")
+        return redirect("/book/")

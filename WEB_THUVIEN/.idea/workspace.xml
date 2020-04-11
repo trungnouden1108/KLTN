@@ -10,8 +10,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="HTML File" />
         <option value="Python Script" />
+        <option value="HTML File" />
       </list>
     </option>
   </component>
@@ -28,21 +28,21 @@
   <component name="PropertiesComponent">
     <property name="DefaultHtmlFileTemplate" value="HTML File" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/login/templates/login" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/image_book/image_user" />
     <property name="settings.editor.selected.configurable" value="configurable.group.project" />
   </component>
   <component name="RecentsManager">
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="I:\Đồ án\WEB_THUVIEN\login\templates\login" />
-      <recent name="I:\Đồ án\WEB_THUVIEN\login\templates\contact" />
-      <recent name="I:\Đồ án\WEB_THUVIEN\login\templates\muontra" />
-      <recent name="I:\Đồ án\WEB_THUVIEN\login\templates\book" />
-      <recent name="I:\Đồ án\WEB_THUVIEN\login\templates\homepage" />
-    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="I:\Đồ án\WEB_THUVIEN\login" />
       <recent name="I:\Đồ án\WEB_THUVIEN\static" />
       <recent name="I:\Đồ án\WEB_THUVIEN\login\templates" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="I:\Đồ án\WEB_THUVIEN\image_book\image_user" />
+      <recent name="I:\Đồ án\WEB_THUVIEN\login\templates\rate" />
+      <recent name="I:\Đồ án\WEB_THUVIEN\login\templates\login" />
+      <recent name="I:\Đồ án\WEB_THUVIEN\login\templates\contact" />
+      <recent name="I:\Đồ án\WEB_THUVIEN\login\templates\muontra" />
     </key>
   </component>
   <component name="RunManager">
@@ -68,10 +68,10 @@
       <screen x="0" y="0" width="1366" height="728" />
     </state>
     <state x="137" y="46" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1366.728@0.0.1366.728" timestamp="1584634966552" />
-    <state x="452" y="199" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1583863525803">
+    <state x="452" y="199" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1586519241822">
       <screen x="0" y="0" width="1366" height="728" />
     </state>
-    <state x="452" y="199" key="#com.intellij.fileTypes.FileTypeChooser/0.0.1366.728@0.0.1366.728" timestamp="1583863525803" />
+    <state x="452" y="199" key="#com.intellij.fileTypes.FileTypeChooser/0.0.1366.728@0.0.1366.728" timestamp="1586519241822" />
     <state x="521" y="131" key="FileChooserDialogImpl" timestamp="1583498718967">
       <screen x="0" y="0" width="1366" height="728" />
     </state>
@@ -80,10 +80,10 @@
       <screen x="0" y="0" width="1366" height="728" />
     </state>
     <state x="244" y="18" key="SettingsEditor/0.0.1366.728@0.0.1366.728" timestamp="1582982294704" />
-    <state x="391" y="193" key="com.intellij.ide.util.TipDialog" timestamp="1585983619466">
+    <state x="391" y="193" key="com.intellij.ide.util.TipDialog" timestamp="1586603523904">
       <screen x="0" y="0" width="1366" height="728" />
     </state>
-    <state x="391" y="193" key="com.intellij.ide.util.TipDialog/0.0.1366.728@0.0.1366.728" timestamp="1585983619466" />
+    <state x="391" y="193" key="com.intellij.ide.util.TipDialog/0.0.1366.728@0.0.1366.728" timestamp="1586603523904" />
     <state x="391" y="0" width="586" height="728" key="find.popup" timestamp="1585240401571">
       <screen x="0" y="0" width="1366" height="728" />
     </state>

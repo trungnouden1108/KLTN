@@ -254,7 +254,7 @@ section
     min-height: 400px;
     background: transparent;
 }
-.rating_r i::before
+/*.rating_r i::before
 {
 	font-family: 'FontAwesome';
 	content: "\f006";
@@ -277,7 +277,7 @@ section
 .rating_r_5 i:nth-child(2)::before{content: "\f005";}
 .rating_r_5 i:nth-child(3)::before{content: "\f005";}
 .rating_r_5 i:nth-child(4)::before{content: "\f005";}
-.rating_r_5 i:nth-child(5)::before{content: "\f005";}
+.rating_r_5 i:nth-child(5)::before{content: "\f005";}*/
 
 /*********************************
 3. Header
@@ -1740,7 +1740,7 @@ select option
 	width: 36px;
 	height: 36px;
 	border-radius: 50%;
-	color: #FFFFFF;
+	color: #FFFF00;
 	font-size: 10px;
 	font-weight: 500;
 	line-height: 36px;
@@ -1748,7 +1748,7 @@ select option
 }
 .item_discount
 {
-	background: #df3b3b;
+	background: #FF66FF;
 	margin-right: 5px;
 }
 .item_new
@@ -2148,6 +2148,12 @@ select option
             border: 3px solid #33FFCC;
             width: 145%; /* Could be more or less, depending on screen size */
         }
+.trung5-content {
+            background-color: #FFFFFF;
+            margin: 0px 90px 100px 320px ; /* 15% from the top and centered */
+            border: 3px solid #33FFCC;
+            width: 50%; /* Could be more or less, depending on screen size */
+        }
 .input_form1{
     margin-left: 10%
     }
@@ -2157,6 +2163,22 @@ select option
  .input_form4{
     margin-left: 40%
     }
+  .input_form5{
+    margin-left: 5%
+    }
+
+.input_rate1{
+    margin-left: 20%
+
+}
+.input_rate2{
+    margin-left: 20%
+
+}
+.input_rate3{
+    margin-left: 20%
+
+}
 .container1 {
         padding: 16px;
     }
@@ -2164,7 +2186,7 @@ select option
         padding: 30px;
     }
 .container3 {
-        padding: 0px;
+        padding: 15px;
     }
 .imgcontainer1 {
         text-align: center;
@@ -2272,4 +2294,54 @@ button:hover {
 
 .line_p{
     line-height: 20px;
+}
+
+.rating {
+  transform: rotateY(180deg);
+  display:flex
+}
+.rating input
+{
+    display:none;
+}
+.rating label{
+    display:block;
+    cursor:pointer;
+    width:20px;
+}
+.rating label:before{
+    content:'\f005';
+    font-family:fontAwesome;
+    position:relative;
+    display:block;
+    font-size:20px;
+    color:#101010;
+}
+.rating label:after{
+    content:'\f005';
+    font-family:fontAwesome;
+    position:absolute;
+    display:block;
+    font-size:20px;
+    color:#ffff00;
+    top:0;
+    opacity:0;
+    transition:0.5s;
+    text-shadow: 0 2px 5px rgba(0,0,0,0.5);
+}
+.rating label:hover:after,
+.rating label:hover ~ label:after,
+.rating input:checked ~ label:after
+{
+    opacity:1;
+}
+
+.td1{
+text-align:center;
+vertical-align:center;
+width:100px;
+}
+.ta{
+width:85%;
+cellspacing:5px;
 }

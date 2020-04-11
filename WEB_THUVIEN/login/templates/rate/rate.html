@@ -3,15 +3,12 @@
 
 {% block cssblock %}
 <link rel="stylesheet" type="text/css" href="{% static 'styles/bootstrap4/bootstrap.min.css' %}">
-<link href="{% static 'plugins/fontawesome-free-5.0.1/css/fontawesome-all.css' %}" rel="stylesheet" type="text/css">
 <link rel="stylesheet" type="text/css" href="{% static 'plugins/OwlCarousel2-2.2.1/owl.carousel.css' %}">
 <link rel="stylesheet" type="text/css" href="{% static 'plugins/OwlCarousel2-2.2.1/owl.theme.default.css' %}">
 <link rel="stylesheet" type="text/css" href="{% static 'plugins/OwlCarousel2-2.2.1/animate.css' %}">
 <link rel="stylesheet" type="text/css" href="{% static 'styles/product_styles.css' %}">
 <link rel="stylesheet" type="text/css" href="{% static 'styles/product_responsive.css' %}">
-<style>
-
-</style>
+<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
 
 {% endblock %}
 {% block content %}
@@ -30,31 +27,74 @@
 	<div class="single_product">
 		<div class="container">
 			<div class="row">
-				<!-- Images -->
-				<!-- Selected Image -->
-				<div class="col-lg-5 order-lg-2 order-1">
-					<div class="image_selected"><img src="{% static 'images/hdmuon.png' %}" alt=""></div>
-				</div>
-				<!-- Mượn sách -->
-				<div class="col-lg-5 order-3">
-            		<form class="trung1-content" action="." method="post">
-                	{% csrf_token %}
-            		<div class="container1">
-						<div class="imgcontainer1">
-            				<img src="../static/image_web/muonsach.png" alt="Avatar" class="avatar">
-            			</div>
-						<p><input  class="input_form1 form1" type="text" id="tag_id1" name="book_1"placeholder="Sách mượn 1..."> <button type="button" onclick="scanid1()" class="scan"><b>Scan sách</b></button> </p>
-						<p><input  class="input_form1 form1" type="text" id="tag_id2" name="book_2"placeholder="Sách mượn 2..."> <button type="button" onclick="scanid2()" class="scan"><b>Scan sách</b></button> </p></p>
-						<p><input  class="input_form1 form1" type="text" id="tag_id3" name="book_3"placeholder="Sách mượn 3..."> <button type="button" onclick="scanid3()" class="scan"><b>Scan sách</b></button> </p></p>
-					</div>
-						<div class="clearfix1">
-                    <button type="button" onclick="location.href='{% url 'book' %}'" class="cancelbtn">Cancel</button>
-                    <button type="submit" class="signupbtn">Mượn sách</button>
-        			</div>
-					</form>
 
+				<form class="trung5-content" action="." method="post">
+					{% csrf_token %}
+					<div class="container3">
+						<h3 align="center">Đánh giá của bạn</h3>
+					<hr>
+						<table class="ta">
+							{% if name_book1 != "" %}
+							<tr>
+								<td class="td1">
+									<p><input  class="form4" type="text" readonly="readonly" value="{{name_book1}}"></p>
+								</td>
+								<td class="td1">
+									<div class="rating ">
+									<input type="radio" name="star" value="5" id="star1"><label for="star1"></label>
+									<input  type="radio" name="star" value="4" id="star2"><label for="star2"></label>
+									<input type="radio" name="star" value="3" id="star3"><label for="star3"></label>
+									<input type="radio" name="star" value="2" id="star4"><label for="star4"></label>
+									<input type="radio" name="star" value="1" id="star5"><label for="star5"></label>
+									</div>
+									<h6></h6>
+								</td>
+							</tr>
+							{% endif %}
+							{% if name_book2 != "" %}
+							<tr>
+								<td class="td1">
+									<p><input  class=" form4 " type="text" readonly="readonly" value="{{name_book2}}"></p>
+								</td>
+								<td class="td1">
+									<div class="rating">
+									<input type="radio" name="star1" value="5" id="star1_1"><label for="star1_1"></label>
+									<input  type="radio" name="star1" value="4" id="star2_1"><label for="star2_1"></label>
+									<input type="radio" name="star1" value="3" id="star3_1"><label for="star3_1"></label>
+									<input type="radio" name="star1" value="2" id="star4_1"><label for="star4_1"></label>
+									<input type="radio" name="star1" value="1" id="star5_1"><label for="star5_1"></label>
+									</div>
+									<h6></h6>
+								</td>
+							</tr>
+							{% endif %}
+							{% if name_book3 != "" %}
+							<tr>
+								<td class="td1">
+									<p><input  class="form4 " type="text" readonly="readonly" value="{{name_book3}}"></p>
+								</td>
+								<td class="td1">
+									<div class="rating">
+									<input type="radio" name="star2" value="5" id="star1_2"><label for="star1_2"></label>
+									<input  type="radio" name="star2" value="4" id="star2_2"><label for="star2_2"></label>
+									<input type="radio" name="star2" value="3" id="star3_2"><label for="star3_2"></label>
+									<input type="radio" name="star2" value="2" id="star4_2"><label for="star4_2"></label>
+									<input type="radio" name="star2" value="1" id="star5_2"><label for="star5_2"></label>
+									</div>
+									<h6></h6>
+								</td>
+							</tr>
+							{% endif %}
+						</table>
+
+					<div class="clearfix1">
+						<p class="input_form5"></p>
+                    <button type="button" onclick="location.href='{% url 'book' %}'" class="cancelbtn">Bỏ qua</button>
+                    <button type="submit" class="signupbtn">Đánh giá</button>
+        			</div>
+					</div>
+				</form>
 				</div>
-			</div>
 		</div>
 	</div>
 
@@ -121,6 +161,7 @@
 			</div>
 		</div>
 	</div>
+
 	<div class="viewed">
 		<div class="container">
 			<div class="row">

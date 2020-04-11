@@ -201,6 +201,46 @@
 		</div>
 	</div>
 
+	<div class="viewed">
+		<div class="container">
+			<div class="row">
+				<div class="col">
+					<div class="viewed_title_container">
+						<h3 class="viewed_title">Sách được đánh giá cao</h3>
+						<div class="viewed_nav_container">
+							<div class="viewed_nav viewed_prev"><i class="fas fa-chevron-left"></i></div>
+							<div class="viewed_nav viewed_next"><i class="fas fa-chevron-right"></i></div>
+						</div>
+					</div>
+
+					<div class="viewed_slider_container">
+
+						<!-- Recently Viewed Slider -->
+
+						<div class="owl-carousel owl-theme viewed_slider">
+
+							<!-- Recently Viewed Item -->
+							{% for book in list_rate %}
+							<div class="owl-item">
+								<div class="viewed_item discount d-flex flex-column align-items-center justify-content-center text-center">
+									<div class="viewed_image"><img src="{{book.image_book.url}}" height="130px" alt=""></div>
+									<div class="viewed_content text-center">
+										<div class="viewed_name"><a href="/detailbook/{{book.id}}">{{book.title}}</a></div>
+									</div>
+									<ul class="item_marks">
+										<li class="item_mark item_discount">{{book.ave_rate}}★</li>
+									</ul>
+								</div>
+							</div>
+							{% endfor %}
+						</div>
+
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
 
 </div>
 

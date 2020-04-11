@@ -1910,7 +1910,7 @@ select option
 	width: 36px;
 	height: 36px;
 	border-radius: 50%;
-	color: #FFFFFF;
+	color: #FFFF00;
 	font-size: 10px;
 	font-weight: 500;
 	line-height: 36px;
@@ -1918,7 +1918,7 @@ select option
 }
 .item_discount
 {
-	background: #df3b3b;
+	background: #FF66FF;
 	margin-right: 5px;
 }
 .item_new

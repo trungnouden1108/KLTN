@@ -73,7 +73,7 @@
         }
         }
 
-    button {
+    .button1 {
         background-color: #4CAF50;
         color: white;
         padding: 14px 20px;
@@ -81,6 +81,16 @@
         border: none;
         cursor: pointer;
         width: 100%;
+    }
+       .button2 {
+        background-color: #4CAF50;
+        color: white;
+        padding: 10px 20px;
+        margin: 8px 20px 0px;
+        border: none;
+        cursor: pointer;
+        width: 100%;
+        border-radius: 50%;
     }
 
 /* Add a hover effect for buttons */
@@ -99,9 +109,12 @@ button:hover {
   float: left;
   width: 50%;
         }
-
+.scanuser{
+float: right;
+width:30%
+}
     .input_form{
-    margin-left: 28%
+    margin-left: 15%
     }
 
     .imgcontainer {
@@ -122,6 +135,14 @@ button:hover {
     </style>
 </head>
 <body>
+{% if messages %}
+        {% for message in messages %}
+            <div align="center" class="alert">
+            <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+                <strong>{{ message }} </strong>
+            </div>
+        {% endfor %}
+    {% endif %}
         <div id="id02" class="modal">
             <form class="modal-content" action="." method="post">
                 {% csrf_token %}
@@ -130,16 +151,26 @@ button:hover {
             </div>
 
             <div class="container">
-             <p class="input_form"><label><b>ID Độc Giả:</b> </label></p>
-                <input  class="input_form" type="text" name="id_check" value="{{ id_check }}">
+             <p class="input_form"><label><b>ID Độc Giả:</b> </label><button type ="button" class="button2 scanuser" onclick="scan_user()">Scan User</button></p>
+                <p><input  class="input_form" type="text" name="id_check" id="id_check"></p>
 
         </div>
 
         <div class="clearfix">
-                    <button type="button" onclick="location.href='{% url 'begin' %}'" class="cancelbtn">Cancel</button>
-                    <button type="submit" class="signupbtn">Sign In</button>
+                    <button type="button" onclick="location.href='{% url 'begin1' %}'" class="button1 cancelbtn">Cancel</button>
+                    <button type="submit" class="button1 signupbtn">Sign In</button>
         </div>
   </form>
 </div>
 </body>
+<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+<script>
+     function scan_user(){
+    $.get("/scan_user/", function(data) {
+            console.log(data.id_user);
+        const a=document.getElementById('id_check');
+        a.value=data.id_user;
+    });
+}
+</script>
 </html>

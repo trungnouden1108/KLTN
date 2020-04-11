@@ -38,8 +38,12 @@ class Book(models.Model):
     description = models.TextField(default='',blank=False,null=False)
     #price = models.IntegerField(default=0)
     image_book=models.ImageField(upload_to='image_book/',blank=True,null=True)
+    author=models.CharField(default='',blank=True,max_length=50)
     active = models.BooleanField(default=True)
     new=models.BooleanField(default=False,blank=True)
+    rate = models.IntegerField(blank=True, default=0)
+    vote = models.IntegerField(blank=True, default=0)
+    ave_rate=models.IntegerField(blank=True,default=0)
     time_create=models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'login.apps.LoginConfig',
     'django_filters',
     'widget_tweaks',
+
 ]
 
 

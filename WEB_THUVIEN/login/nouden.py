@@ -20,7 +20,19 @@ def getsensordata():
     except Exception as e:
         print("Exception: Opening serial port: " + str(e))
         global id,a
+    start = datetime.datetime.now()
+    second_start = start.second
+    minute_start = start.minute
+    hour_start = start.hour
+    bef = hour_start * 3600 + minute_start * 60 + second_start
     while True:
+        end = datetime.datetime.now()
+        second_end = end.second
+        minute_end = end.minute
+        hour_end = end.hour
+        atf = hour_end * 3600 + minute_end * 60 + second_end
+        if (atf-bef>=5):
+            break;
         a = arduino.readline().decode()
     # b=str(a,encode='utf-8')
         time.sleep(0.25)
@@ -36,6 +48,43 @@ def getsensordata():
     arduino.close()
     return id
 
+def getiduser():
+
+    #st = list(str(arduino.readline(), 'utf-8'))
+    #return (str(''.join(st[:])))
+    try:
+        arduino.open()
+    except Exception as e:
+        print("Exception: Opening serial port: " + str(e))
+        global id,a
+    start = datetime.datetime.now()
+    second_start = start.second
+    minute_start = start.minute
+    hour_start = start.hour
+    bef = hour_start * 3600 + minute_start * 60 + second_start
+    while True:
+        end = datetime.datetime.now()
+        second_end = end.second
+        minute_end = end.minute
+        hour_end = end.hour
+        atf = hour_end * 3600 + minute_end * 60 + second_end
+        print(atf-bef)
+        if (atf-bef >=10):
+            break;
+        a = arduino.readline().decode()
+    # b=str(a,encode='utf-8')
+        time.sleep(0.25)
+        c = a.replace(" ", "")
+        e = c.replace("\r", "")
+        id = e.replace("\n", "")
+        print("f",id)
+        print(type(id))
+        time.sleep(0.25)
+        if id != "":
+            time.sleep(0.125)
+            break;
+    arduino.close()
+    return id
 
 def getdata():
     #st = list(str(arduino.readline(), 'utf-8'))

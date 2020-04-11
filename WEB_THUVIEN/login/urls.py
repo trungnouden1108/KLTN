@@ -6,9 +6,11 @@ from . import views
 
 urlpatterns = [
     path('register/', views.register.as_view(),name='script'),
+    path('scan_user/',views.scan_user,name='scanuser'),
     path('video/',views.video_feed,name='video'),
     path('login/', views.login.as_view(),name='check'),
-    path('',views.begin.as_view(),name='begin'),
+    #path('',views.begin.as_view(),name='begin'),
+    path('',views.begin1.as_view(),name='begin1'),
     #path('^/(?P<stream_path>(.*?))/$',views.dynamic_stream,name='videostream'),
     #path('stream/',views.indexscreen),
     path('detailuser/',views.detailuser,name='detailuser'),
@@ -41,4 +43,7 @@ urlpatterns = [
 
     #-----contact------#
     path('contact/',views.contact.as_view(),name='contact'),
+
+    #-----rating------#
+    path('rate/',views.rating.as_view(),name='rate'),
 ]
