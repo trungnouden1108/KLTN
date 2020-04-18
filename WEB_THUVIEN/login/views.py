@@ -430,26 +430,42 @@ def addcart(request):
         else:
             return HttpResponse('mươn ko thành công')
 """
+timeout_1=0
 
 def book(request):
-    flag1 = 0
-    try:
-        DocGia.objects.get(id_DG=id_user)
-        flag1 = 1
-    except ObjectDoesNotExist:
-        flag1 = 0
-    if flag1 == 0:
-        messages.error(request, "Bạn chưa đăng nhập")
-        return redirect('/')
-    user = DocGia.objects.get(id_DG=id_user)
-    book = Book.objects.all()
-    book1 = book.filter(active=True)
-    book_filter=BookFilter(request.GET,queryset=book1)
-    #sl = book1.aggregate(Count('id'))
-    sl=book_filter.qs.count()
-    Data={'form':book_filter.form,'list_book':book_filter.qs,'sl':sl,'tenDG':user.ten_DG,'list_book1':Book.objects.all(),'list_rate':Book.objects.filter(ave_rate__gte=4).order_by('-ave_rate')}
-    return render(request,'book/book.html',Data)
-
+    start = datetime.datetime.now()
+    second_start = start.second
+    minute_start = start.minute
+    hour_start = start.hour
+    timeout_1 = hour_start * 3600 + minute_start * 60 + second_start
+    timeout_2=0
+    while True:
+        start = datetime.datetime.now()
+        second_start = start.second
+        minute_start = start.minute
+        hour_start = start.hour
+        timeout_2 = hour_start * 3600 + minute_start * 60 + second_start
+        if(timeout_2-timeout_1 <120):
+            print(timeout_2-timeout_1)
+            flag1 = 0
+            try:
+                DocGia.objects.get(id_DG=id_user)
+                flag1 = 1
+            except ObjectDoesNotExist:
+                flag1 = 0
+            if flag1 == 0:
+                messages.error(request, "Bạn chưa đăng nhập")
+                return redirect('/')
+            user = DocGia.objects.get(id_DG=id_user)
+            book = Book.objects.all()
+            book1 = book.filter(active=True)
+            book_filter=BookFilter(request.GET,queryset=book1)
+            #sl = book1.aggregate(Count('id'))
+            sl=book_filter.qs.count()
+            Data={'form':book_filter.form,'list_book':book_filter.qs,'sl':sl,'tenDG':user.ten_DG,'list_book1':Book.objects.all(),'list_rate':Book.objects.filter(ave_rate__gte=4).order_by('-ave_rate')}
+            return render(request,'book/book.html',Data)
+        else:
+            return redirect('/')
 
 
 
@@ -1280,23 +1296,36 @@ def detailuser(request):
     name1=""
     name2=""
     name3=""
+    day1=0
+    day2=0
+    day3=0
+    time_pre = datetime.datetime.now(timezone.utc) + datetime.timedelta(hours=7)
     try:
         book1=Book.objects.get(id_book=check_cart.id_bor1)
         name1=book1.title
+        time1=check_cart.create1
+        day1=time_pre-time1
     except ObjectDoesNotExist:
         name1=""
     try:
         book2=Book.objects.get(id_book=check_cart.id_bor2)
         name2=book2.title
+        time2=check_cart.create2
+        day2=time_pre-time2
+
     except ObjectDoesNotExist:
         name2=""
     try:
         book3=Book.objects.get(id_book=check_cart.id_bor3)
         name3=book3.title
+        time3=check_cart.create3
+        day3=time_pre-time3
+
     except ObjectDoesNotExist:
         name3=""
 
-    Data={'tenDG': user.ten_DG,'form': book_filter.form,'list_book1': Book.objects.all(),'DG':user,'book1':name1,'book2':name2,'book3':name3,'list_rate':Book.objects.filter(ave_rate__gte=4).order_by('-ave_rate')}
+    Data={'tenDG': user.ten_DG,'form': book_filter.form,'list_book1': Book.objects.all(),'DG':user,'book1':name1,'book2':name2,'book3':name3,
+          'day1':day1.days,'day2':day2.days,'day3':day2.days,'list_rate':Book.objects.filter(ave_rate__gte=4).order_by('-ave_rate')}
     return render(request,'login/detailuser.html',Data)
 
 class rating(View):

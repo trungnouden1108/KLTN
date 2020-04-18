@@ -24,7 +24,7 @@ urlpatterns = [
 
     path('checkbook/',views.check_book,name='checkbook'),
     path('test/',views.testcheck,name='testcheck'),
-    path('book/',views.book,name='book'),
+    path('book/',views.book,name='book',),
     path('book_giaotrinh/',views.book_cate1,name='cate1'),
     path('book_vanhoc/',views.book_cate2,name='cate2'),
     path('book_tamly/',views.book_cate3,name='cate3'),

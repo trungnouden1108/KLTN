@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-
 	<title>..:: SMART LIBRARY ::..</title>
     <style>
 
@@ -84,7 +83,7 @@ button:hover {
 
     </style>
 </head>
-<body>
+<body onload="noBack();">
     {% if messages %}
         {% for message in messages %}
             <div align="center" class="alert">
@@ -97,4 +96,12 @@ button:hover {
     <button class="button-2 animate" onclick="location.href='{% url 'check' %}'">Login</button>
 
 </body>
+ <script>
+        window.onload = function () {
+           noBack();
+       }
+       function noBack() {
+           window.history.back(http://127.0.0.1:8000/);
+       }
+ </script>
 </html>

@@ -2146,7 +2146,7 @@ select option
             background-color: #FFFFFF;
             margin: 0px 300px 50px 0px ; /* 15% from the top and centered */
             border: 3px solid #33FFCC;
-            width: 145%; /* Could be more or less, depending on screen size */
+            width: 163%; /* Could be more or less, depending on screen size */
         }
 .trung5-content {
             background-color: #FFFFFF;
@@ -2161,10 +2161,10 @@ select option
     margin-left: 20%
     }
  .input_form4{
-    margin-left: 40%
+    margin-left: 40%;
     }
   .input_form5{
-    margin-left: 5%
+    margin-left: 110%;
     }
 
 .input_rate1{
@@ -2267,6 +2267,18 @@ button:hover {
           color: #FF0000;
           width:250px;
         }
+.form5 {
+          border: 3px solid #33FFFF;
+          text-align: center;
+          color: #FF0000;
+          width:100px;
+        }
+.form6 {
+          border: 3px solid #FF0000;
+          text-align: center;
+          color: #FF0000;
+          width:100px;
+        }
 .form2 {
             border: 3px solid #33FFFF;
             text-align: center;
@@ -2294,6 +2306,11 @@ button:hover {
 
 .line_p{
     line-height: 20px;
+}
+
+.line_p_3{
+margin-top:10px;
+    line-height: 33px;
 }
 
 .rating {

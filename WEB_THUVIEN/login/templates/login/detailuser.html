@@ -1,4 +1,4 @@
-{% extends 'muontra/base.html' %}
+{% extends 'homepage/base.html' %}
 {% load static %}
 
 {% block cssblock %}
@@ -57,12 +57,51 @@
 									<p><input  class="input_form3 form3 " type="text" readonly="readonly" value="{{DG.money_user}}"></p>
 								</th>
 								<th>
+									{% if book1 != "" %}
 									<p class="input_form4 line_p"><label><b>Sách mượn 1:</b></label></p>
 									<p><input  class="input_form4 form4 " type="text" readonly="readonly" value="{{book1}}"></p>
+									{% endif %}
+									{% if book2 != "" %}
 									<p class="input_form4 line_p"><label><b>Sách mượn 2:</b> </label></p>
 									<p><input  class="input_form4 form4 " type="text" readonly="readonly" value="{{book2}}"></p>
+									{% endif %}
+									{% if book3 != "" %}
 									<p class="input_form4 line_p"><label><b>Sách mượn 3:</b> </label></p>
 									<p><input  class="input_form4 form4 " type="text" readonly="readonly" value="{{book3}}"></p>
+									{% endif %}
+								</th>
+								<th>
+									{% if book1 != "" %}
+									{% if day1 < 7 %}
+									<p class="input_form5 line_p"><label><b>★</b></label></p>
+									<p><input  class="input_form5 form5" type="text" readonly="readonly" value="{{day1}} ngày"></p>
+									{% endif %}
+									{% if day1 >= 7 %}
+									<p class="input_form5 line_p"><label><b>★</b></label></p>
+									<p><input  class="input_form5 form6" type="text" readonly="readonly" value="{{day1}} ngày"></p>
+									{% endif %}
+									{% endif %}
+									{% if book2 != "" %}
+									{% if day2 < 7 %}
+									<p class="input_form5 line_p"><label><b>★</b></label></p>
+									<p><input  class="input_form5 form5" type="text" readonly="readonly" value="{{day2}} ngày"></p>
+									{% endif %}
+									{% if day2 >= 7 %}
+									<p class="input_form5 line_p"><label><b>★</b></label></p>
+									<p><input  class="input_form5 form6" type="text" readonly="readonly" value="{{day2}} ngày"></p>
+									{% endif %}
+									{% endif %}
+									{% if book3 != "" %}
+									{% if day3 < 7 %}
+									<p class="input_form5 line_p"><label><b>★</b></label></p>
+									<p><input  class="input_form5 form5" type="text" readonly="readonly" value="{{day3}} ngày"></p>
+									{% endif %}
+									{% if day3 >= 7 %}
+									<p class="input_form5 line_p"><label><b>★</b></label></p>
+									<p><input  class="input_form5 form6" type="text" readonly="readonly" value="{{day3}} ngày"></p>
+									{% endif %}
+									{% endif %}
+
 								</th>
 								</tr>
 							</table>

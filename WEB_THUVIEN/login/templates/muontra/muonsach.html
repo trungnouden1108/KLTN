@@ -1,4 +1,4 @@
-{% extends 'muontra/base.html' %}
+{% extends 'homepage/base.html' %}
 {% load static %}
 
 {% block cssblock %}
@@ -43,9 +43,9 @@
 						<div class="imgcontainer1">
             				<img src="../static/image_web/muonsach.png" alt="Avatar" class="avatar">
             			</div>
-						<p><input  class="input_form1 form1" type="text" id="tag_id1" name="book_1"placeholder="Sách mượn 1..."> <button type="button" onclick="scanid1()" class="scan"><b>Scan sách</b></button> </p>
-						<p><input  class="input_form1 form1" type="text" id="tag_id2" name="book_2"placeholder="Sách mượn 2..."> <button type="button" onclick="scanid2()" class="scan"><b>Scan sách</b></button> </p></p>
-						<p><input  class="input_form1 form1" type="text" id="tag_id3" name="book_3"placeholder="Sách mượn 3..."> <button type="button" onclick="scanid3()" class="scan"><b>Scan sách</b></button> </p></p>
+						<p><input  class="input_form1 form1" readonly="readonly" type="text" id="tag_id1" name="book_1"placeholder="Sách mượn 1..."> <button type="button" onclick="scanid1()" class="scan"><b>Scan sách</b></button> </p>
+						<p><input  class="input_form1 form1" readonly="readonly" type="text" id="tag_id2" name="book_2"placeholder="Sách mượn 2..."> <button type="button" onclick="scanid2()" class="scan"><b>Scan sách</b></button> </p></p>
+						<p><input  class="input_form1 form1" readonly="readonly" type="text" id="tag_id3" name="book_3"placeholder="Sách mượn 3..."> <button type="button" onclick="scanid3()" class="scan"><b>Scan sách</b></button> </p></p>
 					</div>
 						<div class="clearfix1">
                     <button type="button" onclick="location.href='{% url 'book' %}'" class="cancelbtn">Cancel</button>
